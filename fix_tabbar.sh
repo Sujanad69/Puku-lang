@@ -1,3 +1,4 @@
+cat << 'INNER_EOF' > src/components/FloatingGlassTabBar.tsx
 import React from 'react';
 import { ActiveModal } from '../types';
 import { playTone } from '../utils/audio';
@@ -107,3 +108,6 @@ export const FloatingGlassTabBar: React.FC<FloatingGlassTabBarProps> = ({
     </div>
   );
 };
+INNER_EOF
+chmod +x fix_tabbar.sh
+./fix_tabbar.sh

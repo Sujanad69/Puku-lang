@@ -235,7 +235,14 @@ export const Full3DWardrobe: React.FC<Full3DWardrobeProps> = ({
           shadow-intensity="1.5"
           shadow-softness="1"
           style={{ width: '100%', height: '100%', outline: 'none', position: 'absolute', top: 0, left: 0, zIndex: 5 }}
-        />
+        >
+          <div slot="poster" className="absolute inset-0 flex flex-col items-center justify-center bg-transparent z-10 transition-opacity duration-300">
+             <div className="w-12 h-12 border-4 border-[#58cc02] border-t-transparent rounded-full animate-spin shadow-lg"></div>
+             <span className="mt-4 text-sm font-extrabold text-[#58cc02] bg-white/80 dark:bg-black/50 px-4 py-1.5 rounded-full backdrop-blur-sm tracking-wide shadow-sm">
+                Loading 3D Style...
+             </span>
+          </div>
+        </model-viewer>
       </div>
 
       {/* Floating Outfit Selector Deck */}

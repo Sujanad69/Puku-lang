@@ -16,7 +16,7 @@ export const VaultAndStatsModal: React.FC<VaultAndStatsModalProps> = ({
   onToggleReminders,
 }) => {
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[#f4f5f8] dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-hidden animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex flex-col bg-[#f4f5f8] dark:bg-black text-slate-900 dark:text-slate-100 overflow-hidden animate-in fade-in duration-200">
       {/* Top Bar */}
       <div className="flex items-center justify-between border-b border-black/5 dark:border-white/10 bg-white dark:bg-slate-900 px-4 py-3 shadow-sm pt-safe">
         <button

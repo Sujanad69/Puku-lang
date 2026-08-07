@@ -191,7 +191,7 @@ export default function App() {
   const selectedUnit = UNITS_DATA[selectedUnitId] || UNITS_DATA.unit1;
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'dark bg-slate-950 text-slate-100' : 'bg-[#f8f9fa] text-[#1c1c1e]'} font-sans pb-28 transition-colors duration-300`}>
+    <div className={`min-h-screen ${theme === 'dark' ? 'dark bg-black text-slate-100' : 'bg-[#f8f9fa] text-[#1c1c1e]'} font-sans pb-28 transition-colors duration-300`}>
       {/* Top Dynamic Mascot Island Bar */}
       <MascotIsland
         progress={progress}
