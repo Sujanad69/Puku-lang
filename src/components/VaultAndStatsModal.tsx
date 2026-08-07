@@ -18,10 +18,10 @@ export const VaultAndStatsModal: React.FC<VaultAndStatsModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-[#f4f5f8] dark:bg-black text-slate-900 dark:text-slate-100 overflow-hidden animate-in fade-in duration-200">
       {/* Top Bar */}
-      <div className="flex items-center justify-between border-b border-black/5 dark:border-white/10 bg-white dark:bg-slate-900 px-4 py-3 shadow-sm pt-safe">
+      <div className="flex items-center justify-between border-b border-black/5 dark:border-white/10 bg-white dark:bg-black px-4 py-3 shadow-sm pt-safe">
         <button
           onClick={onClose}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300 active:scale-90 cursor-pointer"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 dark:bg-black/50 text-slate-500 dark:text-slate-300 active:scale-90 cursor-pointer"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
@@ -65,7 +65,7 @@ export const VaultAndStatsModal: React.FC<VaultAndStatsModalProps> = ({
 
         {/* 4 Stats Grid */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-slate-900 p-4 text-center shadow-sm">
+          <div className="rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-black p-4 text-center shadow-sm">
             <span className="text-[10px] font-extrabold uppercase text-slate-400">Total XP Earned</span>
             <div className="mt-1 flex items-center justify-center gap-1 text-2xl font-black text-[#58cc02]">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7c0 3.31 2.69 6 6 6s6-2.69 6-6V2z"/></svg>
@@ -73,7 +73,7 @@ export const VaultAndStatsModal: React.FC<VaultAndStatsModalProps> = ({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-slate-900 p-4 text-center shadow-sm">
+          <div className="rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-black p-4 text-center shadow-sm">
             <span className="text-[10px] font-extrabold uppercase text-slate-400">Coins Collected</span>
             <div className="mt-1 flex items-center justify-center gap-1 text-2xl font-black text-amber-500">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
@@ -81,7 +81,7 @@ export const VaultAndStatsModal: React.FC<VaultAndStatsModalProps> = ({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-slate-900 p-4 text-center shadow-sm">
+          <div className="rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-black p-4 text-center shadow-sm">
             <span className="text-[10px] font-extrabold uppercase text-slate-400">Gems Earned</span>
             <div className="mt-1 flex items-center justify-center gap-1 text-2xl font-black text-purple-600 dark:text-purple-400">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 22 22 7 12 2"/></svg>
@@ -89,7 +89,7 @@ export const VaultAndStatsModal: React.FC<VaultAndStatsModalProps> = ({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-slate-900 p-4 text-center shadow-sm">
+          <div className="rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-black p-4 text-center shadow-sm">
             <span className="text-[10px] font-extrabold uppercase text-slate-400">Hearts</span>
             <div className="mt-1 flex items-center justify-center gap-1 text-2xl font-black text-rose-500">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
@@ -99,7 +99,7 @@ export const VaultAndStatsModal: React.FC<VaultAndStatsModalProps> = ({
         </div>
 
         {/* Weak Words Section */}
-        <div className="rounded-3xl border border-black/5 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm space-y-3">
+        <div className="rounded-3xl border border-black/5 dark:border-white/10 bg-white dark:bg-black p-5 shadow-sm space-y-3">
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-base font-extrabold text-slate-900 dark:text-white">Weak Words Review</h4>
@@ -123,7 +123,7 @@ export const VaultAndStatsModal: React.FC<VaultAndStatsModalProps> = ({
                 <div
                   key={idx}
                   onClick={() => speakPt(w.pt)}
-                  className="flex items-center justify-between rounded-xl bg-slate-50 dark:bg-slate-800 p-3 text-xs cursor-pointer hover:bg-rose-50 dark:hover:bg-slate-700 transition-colors"
+                  className="flex items-center justify-between rounded-xl bg-slate-50 dark:bg-black/50 p-3 text-xs cursor-pointer hover:bg-rose-50 dark:hover:bg-slate-700 transition-colors"
                 >
                   <span className="font-extrabold text-slate-900 dark:text-white">{w.pt}</span>
                   <span className="font-semibold text-slate-500 dark:text-slate-400">"{w.en}"</span>
@@ -138,7 +138,7 @@ export const VaultAndStatsModal: React.FC<VaultAndStatsModalProps> = ({
         </div>
 
         {/* Daily Reminder Settings */}
-        <div className="flex items-center justify-between rounded-3xl border border-black/5 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm">
+        <div className="flex items-center justify-between rounded-3xl border border-black/5 dark:border-white/10 bg-white dark:bg-black p-5 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>

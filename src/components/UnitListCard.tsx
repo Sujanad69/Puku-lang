@@ -30,9 +30,9 @@ export const UnitListCard: React.FC<UnitListCardProps> = ({ onSelectUnit }) => {
           <div
             key={unit.id}
             onClick={() => onSelectUnit(unit.id)}
-            className="unit-card bg-white dark:bg-slate-900 rounded-[24px] p-[20px] flex items-center gap-4 border border-black/5 dark:border-white/10 shadow-[0_4px_15px_rgba(0,0,0,0.03)] cursor-pointer transition-transform active:scale-[0.98] hover:border-[#58cc02]"
+            className="unit-card bg-white dark:bg-black rounded-[24px] p-[20px] flex items-center gap-4 border border-black/5 dark:border-white/10 shadow-[0_4px_15px_rgba(0,0,0,0.03)] cursor-pointer transition-transform active:scale-[0.98] hover:border-[#58cc02]"
           >
-            <div className="unit-icon w-[54px] h-[54px] min-w-[54px] rounded-[18px] flex items-center justify-center bg-[#f2f2f7] dark:bg-slate-800 text-[#1c1c1e] dark:text-white shrink-0">
+            <div className="unit-icon w-[54px] h-[54px] min-w-[54px] rounded-[18px] flex items-center justify-center bg-[#f2f2f7] dark:bg-black/50 text-[#1c1c1e] dark:text-white shrink-0">
               {ICON_MAP[unit.iconName] || <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>}
             </div>
 

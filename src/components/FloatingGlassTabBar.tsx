@@ -35,13 +35,13 @@ export const FloatingGlassTabBar: React.FC<FloatingGlassTabBarProps> = ({
   };
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] w-[92vw] max-w-sm sm:max-w-md pointer-events-none">
-      <nav className="pointer-events-auto flex items-center justify-between gap-1 p-1.5 rounded-full bg-white/70 dark:bg-[#111111]/70 backdrop-blur-3xl border border-white/60 dark:border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.2)]">
+    <div className="fixed bottom-0 left-0 w-full z-[9999]">
+      <nav className="flex items-center justify-center sm:justify-center md:gap-4 gap-2 px-4 py-3 sm:py-4 bg-white dark:bg-black border-t border-black/10 dark:border-white/10 pb-[max(env(safe-area-inset-bottom),0.75rem)] w-full">
         
         {/* Tab 1: Learn */}
         <button
           onClick={() => handleSelect('none')}
-          className={`relative flex-1 min-w-[95px] flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-full font-black text-xs tracking-tight transition-colors duration-300 cursor-pointer select-none ${
+          className={`relative flex-1 min-w-[95px] flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-black text-xs tracking-tight transition-colors duration-300 cursor-pointer select-none ${
             currentTab === 'learn'
               ? 'text-white'
               : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
@@ -50,7 +50,7 @@ export const FloatingGlassTabBar: React.FC<FloatingGlassTabBarProps> = ({
           {currentTab === 'learn' && (
             <motion.div
               layoutId="tab-bubble"
-              className="absolute inset-0 bg-[#58cc02] rounded-full shadow-[0_4px_16px_rgba(88,204,2,0.4)]"
+              className="absolute inset-0 bg-[#58cc02] rounded-xl shadow-none"
               transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
             />
           )}
@@ -63,7 +63,7 @@ export const FloatingGlassTabBar: React.FC<FloatingGlassTabBarProps> = ({
         {/* Tab 2: Style */}
         <button
           onClick={() => handleSelect('wardrobe')}
-          className={`relative flex-1 min-w-[95px] flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-full font-black text-xs tracking-tight transition-colors duration-300 cursor-pointer select-none ${
+          className={`relative flex-1 min-w-[95px] flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-black text-xs tracking-tight transition-colors duration-300 cursor-pointer select-none ${
             currentTab === 'style'
               ? 'text-white'
               : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
@@ -72,7 +72,7 @@ export const FloatingGlassTabBar: React.FC<FloatingGlassTabBarProps> = ({
           {currentTab === 'style' && (
             <motion.div
               layoutId="tab-bubble"
-              className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full shadow-[0_4px_16px_rgba(255,150,0,0.4)]"
+              className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl shadow-none"
               transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
             />
           )}
@@ -85,7 +85,7 @@ export const FloatingGlassTabBar: React.FC<FloatingGlassTabBarProps> = ({
         {/* Tab 3: Achievements */}
         <button
           onClick={() => handleSelect('vault')}
-          className={`relative flex-1 min-w-[95px] flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-full font-black text-xs tracking-tight transition-colors duration-300 cursor-pointer select-none ${
+          className={`relative flex-1 min-w-[95px] flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-black text-xs tracking-tight transition-colors duration-300 cursor-pointer select-none ${
             currentTab === 'achievements'
               ? 'text-white'
               : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
@@ -94,7 +94,7 @@ export const FloatingGlassTabBar: React.FC<FloatingGlassTabBarProps> = ({
           {currentTab === 'achievements' && (
             <motion.div
               layoutId="tab-bubble"
-              className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full shadow-[0_4px_16px_rgba(147,51,234,0.4)]"
+              className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl shadow-none"
               transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
             />
           )}
