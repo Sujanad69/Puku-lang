@@ -1,0 +1,6 @@
+{
+  "name": "Portuguese with Sujan 🇵🇹",
+  "description": "A gamified European Portuguese learning app with interactive 3D avatar customization for Sujan, daily streak tracking, audio pronunciation guides, and interactive quizzes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
