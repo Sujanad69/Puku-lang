@@ -1,135 +1,176 @@
 import React, { useState } from 'react';
 import { Unit, VocabWord } from '../types';
-import { speakPt, playTone } from '../utils/audio';
+import { speakPt, playTone, playSuccessSound } from '../utils/audio';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface StudyLoungeModalProps {
   unit: Unit;
   onBack: () => void;
   onStartQuiz: () => void;
+  onStartFlashcards: () => void;
 }
 
 export const StudyLoungeModal: React.FC<StudyLoungeModalProps> = ({
   unit,
   onBack,
-  onStartQuiz,
+  onStartQuiz
 }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [slowMode, setSlowMode] = useState(false);
-  const [activePt, setActivePt] = useState<string | null>(null);
+  const [direction, setDirection] = useState(1);
+  const [isFlipped, setIsFlipped] = useState(false);
+
+  const progressPercent = ((currentIndex + 1) / unit.words.length) * 100;
+  const currentWord = unit.words[currentIndex];
 
   const handleSpeak = (word: VocabWord) => {
-    setActivePt(word.pt);
     playTone(580, 'sine', 0.08);
     speakPt(word.pt, slowMode);
-    setTimeout(() => setActivePt(null), 800);
+  };
+
+  const handleNext = () => {
+    if (currentIndex < unit.words.length - 1) {
+      setDirection(1);
+      setIsFlipped(false);
+      setCurrentIndex(prev => prev + 1);
+    } else {
+      // Finished all cards!
+      playSuccessSound();
+      onStartQuiz();
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentIndex > 0) {
+      setDirection(-1);
+      setIsFlipped(false);
+      setCurrentIndex(prev => prev - 1);
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[#f4f5f8] overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-black/5 bg-white px-4 py-3 shadow-sm pt-safe">
+    <div className="fixed inset-0 z-[9999] flex flex-col bg-white dark:bg-[#121212] overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+      
+      {/* Top Header - Duolingo Style Progress Bar */}
+      <div className="flex items-center justify-between px-4 py-4 pt-safe z-10 bg-white/80 dark:bg-black/80 backdrop-blur-lg border-b border-black/5 dark:border-white/10">
         <button
           onClick={onBack}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700 active:scale-90 transition-transform"
+          className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
 
-        <div className="text-center">
-          <h2 className="text-base font-extrabold text-slate-900 leading-tight">
-            {unit.title}
-          </h2>
-          <p className="text-xs font-semibold text-slate-400">
-            {unit.words.length} European Portuguese Phrases
-          </p>
+        <div className="flex-1 mx-4">
+          <div className="h-4 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+            <motion.div
+              className="h-full bg-[#58cc02] rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPercent}%` }}
+              transition={{ type: 'spring', bounce: 0, duration: 0.5 }}
+            />
+          </div>
         </div>
 
-        {/* Slow Audio Toggle Button */}
         <button
           onClick={() => setSlowMode(!slowMode)}
-          className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold transition-all ${
+          className={`flex h-10 w-10 items-center justify-center rounded-2xl font-bold transition-all ${
             slowMode
-              ? 'bg-amber-100 text-amber-800 border border-amber-200 shadow-sm'
-              : 'bg-slate-100 text-slate-500'
+              ? 'bg-[#58cc02]/20 text-[#58cc02]'
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
           }`}
-          title="Toggle Slow Pronunciation Speed"
+          title="Toggle Slow Audio"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 10 2 4v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3a8 8 0 1 0-16 0v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3l2-4h4Z"/><path d="M4.82 7.9 8 10"/><path d="M15.18 7.9 12 10"/><path d="M16.93 10H20a2 2 0 0 1 0 4H2"/></svg>
-          <span>{slowMode ? '0.65x' : '1.0x'}</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
         </button>
       </div>
 
-      {/* Intro Notice */}
-      <div className="bg-green-50 px-4 py-2.5 text-center border-b border-green-100 flex items-center justify-center gap-2">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.36-7.36l-.71.71M6.34 17.66l-.71.71m12.02 0l.71.71M6.34 6.34l.71.71M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/></svg>
-        <p className="text-xs font-bold text-green-800">
-          Tap any Portuguese card below to hear authentic European accent!
-        </p>
-      </div>
+      {/* Main Flashcard Area */}
+      <div className="flex-1 flex flex-col items-center justify-center p-6 relative overflow-hidden perspective-1000">
+        
+        <h2 className="absolute top-8 text-xl font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+          New Phrase
+        </h2>
 
-      {/* Vocabulary List Container */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 pb-28">
-        {unit.words.map((word: VocabWord, idx: number) => {
-          const isActive = activePt === word.pt;
-
-          return (
-            <div
-              key={idx}
-              onClick={() => handleSpeak(word)}
-              className={`group flex items-center justify-between rounded-2xl border p-4 shadow-sm transition-all cursor-pointer active:scale-[0.98] ${
-                isActive
-                  ? 'border-[#58cc02] bg-green-50/80 shadow-md ring-2 ring-[#58cc02]/20'
-                  : 'border-black/5 bg-white hover:border-[#58cc02]/30'
-              }`}
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={currentIndex}
+            custom={direction}
+            initial={{ opacity: 0, x: direction * 100, rotateY: 0 }}
+            animate={{ opacity: 1, x: 0, rotateY: isFlipped ? 180 : 0 }}
+            exit={{ opacity: 0, x: direction * -100, rotateY: 0 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+            className="w-full max-w-sm aspect-[3/4] relative cursor-pointer group"
+            onClick={() => setIsFlipped(!isFlipped)}
+            style={{ transformStyle: 'preserve-3d' }}
+          >
+            {/* Front of Card (Portuguese) */}
+            <div 
+              className="absolute inset-0 w-full h-full rounded-[32px] bg-white dark:bg-[#1e1e20] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] border-2 border-slate-100 dark:border-white/5 flex flex-col items-center justify-center p-8 text-center backface-hidden"
+              style={{ backfaceVisibility: 'hidden' }}
             >
-              <div className="flex-1 min-w-0 pr-3">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-black text-slate-900 leading-snug">
-                    {word.pt}
-                  </h3>
-                  {word.phonetic && (
-                    <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-500">
-                      [{word.phonetic}]
-                    </span>
-                  )}
-                </div>
-
-                <p className="mt-1 text-sm font-semibold text-slate-600">
-                  {word.en}
-                </p>
-
-                {word.note && (
-                  <p className="mt-1 text-xs font-medium text-slate-400 italic">
-                    💡 {word.note}
-                  </p>
-                )}
-              </div>
-
-              <div
-                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-transform ${
-                  isActive
-                    ? 'bg-[#58cc02] text-white scale-110 shadow-md'
-                    : 'bg-green-50 text-[#58cc02] group-hover:scale-105'
-                }`}
+              <button 
+                onClick={(e) => { e.stopPropagation(); handleSpeak(currentWord); }}
+                className="mb-8 p-6 rounded-full bg-[#1CB0F6] text-white hover:scale-105 active:scale-95 transition-transform shadow-[0_8px_0_#1899D6] active:translate-y-2 active:shadow-none"
               >
-                <svg width="20" height="20" className="fill-current" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+              </button>
+              
+              <h3 className="text-4xl sm:text-5xl font-black text-slate-800 dark:text-white mb-4 leading-tight">
+                {currentWord.pt}
+              </h3>
+              
+              <p className="text-lg font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono bg-slate-100 dark:bg-white/5 px-4 py-2 rounded-xl">
+                {currentWord.phonetic}
+              </p>
+
+              <div className="absolute bottom-6 text-sm font-bold text-slate-300 dark:text-slate-600 uppercase tracking-widest flex items-center gap-2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12h4l2-9 5 18 2-9h5"/></svg>
+                Tap to Translate
               </div>
             </div>
-          );
-        })}
+
+            {/* Back of Card (English) */}
+            <div 
+              className="absolute inset-0 w-full h-full rounded-[32px] bg-[#1CB0F6] shadow-[0_20px_40px_-15px_rgba(28,176,246,0.3)] border-2 border-[#1899D6] flex flex-col items-center justify-center p-8 text-center backface-hidden"
+              style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+            >
+              <h3 className="text-4xl sm:text-5xl font-black text-white mb-4 leading-tight">
+                {currentWord.en}
+              </h3>
+              {currentWord.note && (
+                <p className="text-white/80 font-bold text-lg bg-black/10 px-6 py-3 rounded-2xl mt-4">
+                  💡 {currentWord.note}
+                </p>
+              )}
+            </div>
+
+          </motion.div>
+        </AnimatePresence>
+
       </div>
 
-      {/* Fixed Footer Actions */}
-      <div className="fixed bottom-0 left-0 right-0 border-t border-black/5 bg-white p-4 shadow-xl pb-safe">
-        <div className="mx-auto flex max-w-md gap-3">
-          <button
-            onClick={onStartQuiz}
-            className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-[#58cc02] py-4 font-extrabold text-white text-base shadow-lg shadow-green-500/20 active:translate-y-1 transition-all"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            <span>Test My Knowledge</span>
-          </button>
-        </div>
+      {/* Bottom Action Bar */}
+      <div className="p-4 sm:p-6 bg-white dark:bg-[#121212] border-t border-slate-200 dark:border-white/10 flex items-center justify-between gap-4 pb-safe">
+        <button
+          onClick={handlePrev}
+          disabled={currentIndex === 0}
+          className={`h-[60px] px-8 rounded-2xl font-black text-lg transition-all ${
+            currentIndex === 0
+              ? 'bg-slate-100 text-slate-400 cursor-not-allowed dark:bg-slate-800 dark:text-slate-600'
+              : 'bg-white text-slate-400 border-2 border-slate-200 shadow-[0_4px_0_#e2e8f0] hover:bg-slate-50 active:translate-y-1 active:shadow-none dark:bg-transparent dark:border-slate-700 dark:shadow-[0_4px_0_#334155]'
+          }`}
+        >
+          BACK
+        </button>
+
+        <button
+          onClick={handleNext}
+          className="flex-1 h-[60px] rounded-2xl font-black text-lg text-white bg-[#58cc02] shadow-[0_6px_0_#58a700] hover:bg-[#61e002] active:translate-y-1.5 active:shadow-none transition-all flex items-center justify-center gap-2"
+        >
+          {currentIndex < unit.words.length - 1 ? 'CONTINUE' : 'START QUIZ'}
+        </button>
       </div>
+
     </div>
   );
 };

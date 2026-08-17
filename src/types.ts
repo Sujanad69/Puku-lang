@@ -8,6 +8,9 @@ export interface VocabWord {
 
 export interface Unit {
   id: string;
+  chapterNum: number;
+  chapterTitle: string;
+  chapterDesc: string;
   title: string;
   desc: string;
   color: string;
@@ -41,6 +44,9 @@ export interface UserProgress {
   remindersEnabled: boolean;
   themeDark: boolean;
   streakFrozen?: boolean;
+  hasSeenOnboarding?: boolean;
+  completedUnits: string[];
+  completedLessons?: Record<string, number>;
 }
 
 export interface ChatMessage {
@@ -54,6 +60,8 @@ export interface ChatMessage {
 export type ActiveModal = 
   | 'none'
   | 'study'
+  | 'flashcards'
+  | 'story'
   | 'quiz'
   | 'memory'
   | 'culture'

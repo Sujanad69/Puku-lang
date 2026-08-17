@@ -1,0 +1,52 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} { 
+      allow read, write: if false; 
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+    
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null; }
+
+    function isValidUserProgress(data) {
+      return (
+        data.keys().hasAll(['xp', 'coins']) &&
+        data.xp is number &&
+        data.coins is number &&
+        (data.keys().hasAny(['todayXP']) ? data.todayXP is number : true) &&
+        (data.keys().hasAny(['gems']) ? data.gems is number : true) &&
+        (data.keys().hasAny(['hearts']) ? data.hearts is number : true) &&
+        (data.keys().hasAny(['streak']) ? data.streak is number : true) &&
+        (data.keys().hasAny(['level']) ? data.level is number : true) &&
+        (data.keys().hasAny(['hasSeenOnboarding']) ? data.hasSeenOnboarding is bool : true) &&
+        (data.keys().hasAny(['activeAvatarId']) ? (data.activeAvatarId is string && data.activeAvatarId.size() <= 100) : true) &&
+        (data.keys().hasAny(['completedUnits']) ? (data.completedUnits is list && data.completedUnits.size() <= 50) : true) &&
+        (data.keys().hasAny(['weakWords']) ? (data.weakWords is list && data.weakWords.size() <= 500) : true) &&
+        (data.keys().hasAny(['lastActiveDate']) ? (data.lastActiveDate is string && data.lastActiveDate.size() <= 30) : true) &&
+        (data.keys().hasAny(['completedLessons']) ? data.completedLessons is map : true)
+      );
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      
+      allow create: if isSignedIn() && 
+                    request.auth.uid == userId && 
+                    isValidId(userId) &&
+                    isValidUserProgress(incoming());
+
+      allow update: if isSignedIn() && 
+                    request.auth.uid == userId && 
+                    isValidId(userId) &&
+                    isValidUserProgress(incoming());
+                    
+      allow delete: if false;
+    }
+  }
+}

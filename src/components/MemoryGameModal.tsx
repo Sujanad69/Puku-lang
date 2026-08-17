@@ -116,7 +116,7 @@ export const MemoryGameModal: React.FC<MemoryGameModalProps> = ({
         </button>
 
         <div className="text-center">
-          <h2 className="text-base font-extrabold text-slate-900">Memory Match</h2>
+          <h2 className="text-base font-semibold text-slate-900">Memory Match</h2>
           <p className="text-xs font-semibold text-slate-400">
             Match Portuguese with English pairs!
           </p>
@@ -133,23 +133,23 @@ export const MemoryGameModal: React.FC<MemoryGameModalProps> = ({
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7c0 3.31 2.69 6 6 6s6-2.69 6-6V2z"/></svg>
             </div>
 
-            <h3 className="text-3xl font-black text-slate-900">Parabéns! You Won!</h3>
+            <h3 className="text-3xl font-bold text-slate-900">Parabéns! You Won!</h3>
             <p className="text-sm font-bold text-slate-600">
               Matched all Portuguese pairs!
             </p>
 
             <div className="flex justify-center gap-3">
-              <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1.5 text-sm font-black text-green-700">
+              <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1.5 text-sm font-bold text-green-700">
                 +40 XP
               </span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1.5 text-sm font-black text-amber-700">
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1.5 text-sm font-bold text-amber-700">
                 +10 Coins 🪙
               </span>
             </div>
 
             <button
               onClick={onClose}
-              className="mt-4 rounded-2xl bg-[#58cc02] px-8 py-3.5 font-extrabold text-white shadow-lg active:scale-95"
+              className="mt-4 rounded-2xl bg-[#2563eb] px-8 py-3.5 font-semibold text-white shadow-lg active:scale-95"
             >
               Collect Rewards & Return
             </button>
@@ -164,18 +164,18 @@ export const MemoryGameModal: React.FC<MemoryGameModalProps> = ({
                   key={card.uid}
                   onClick={() => handleCardClick(card)}
                   disabled={card.isMatched}
-                  className={`flex h-28 items-center justify-center rounded-2xl border-2 p-3 text-center font-extrabold text-base shadow-sm transition-all active:scale-95 ${
+                  className={`flex h-28 items-center justify-center rounded-2xl border p-3 text-center font-semibold text-base shadow-sm transition-all active:scale-95 ${
                     card.isMatched
                       ? 'border-slate-200 bg-slate-100 text-slate-400 opacity-40 cursor-default'
                       : isRevealed
-                      ? 'border-[#58cc02] bg-green-50 text-green-900 shadow-md ring-2 ring-green-200'
+                      ? 'border-[#2563eb] bg-blue-50 text-blue-900 shadow-md ring-2 ring-blue-200'
                       : 'border-black/10 bg-white text-slate-700 hover:border-slate-300'
                   }`}
                 >
                   {isRevealed ? (
                     <div className="space-y-1">
                       <p className="leading-tight">{card.text}</p>
-                      <span className="block text-[10px] font-bold uppercase text-[#58cc02]">
+                      <span className="block text-[10px] font-bold uppercase text-[#2563eb]">
                         {card.lang === 'pt' ? '🇵🇹 Portuguese' : '🇬🇧 English'}
                       </span>
                     </div>

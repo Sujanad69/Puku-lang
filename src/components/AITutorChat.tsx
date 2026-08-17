@@ -102,11 +102,11 @@ export const AITutorChat: React.FC<AITutorChatProps> = ({ onClose }) => {
   ];
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] max-w-md mx-auto bg-white rounded-3xl border border-black/5 shadow-xl overflow-hidden">
+    <div className="fixed inset-0 z-[9999] flex flex-col bg-white overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-300">
       {/* Top Bar */}
-      <div className="flex items-center justify-between border-b border-black/5 bg-slate-900 p-4 text-white">
+      <div className="flex items-center justify-between border-b border-black/5 bg-black p-4 text-white">
         <div className="flex items-center gap-3">
-          <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#58cc02] font-black text-white shadow-md">
+          <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#2563eb] font-black text-white shadow-md">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
             <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-400 ring-2 ring-slate-900" />
           </div>
@@ -144,7 +144,7 @@ export const AITutorChat: React.FC<AITutorChatProps> = ({ onClose }) => {
               className={`flex items-end gap-2 ${isSujan ? 'justify-start' : 'justify-end'}`}
             >
               {isSujan && (
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#58cc02] text-white font-black text-xs shadow-sm">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#2563eb] text-white font-black text-xs shadow-sm">
                   S
                 </div>
               )}
@@ -153,7 +153,7 @@ export const AITutorChat: React.FC<AITutorChatProps> = ({ onClose }) => {
                 className={`max-w-[80%] rounded-2xl p-3.5 shadow-sm space-y-1 ${
                   isSujan
                     ? 'bg-white border border-black/5 text-slate-900 rounded-bl-none'
-                    : 'bg-[#58cc02] text-white rounded-br-none font-medium'
+                    : 'bg-[#2563eb] text-white rounded-br-none font-medium'
                 }`}
               >
                 <div className="flex items-center justify-between gap-3">
@@ -161,7 +161,7 @@ export const AITutorChat: React.FC<AITutorChatProps> = ({ onClose }) => {
                   {isSujan && (
                     <button
                       onClick={() => speakPt(msg.text)}
-                      className="text-[#58cc02] hover:scale-110 active:scale-95 transition-transform"
+                      className="text-[#2563eb] hover:scale-110 active:scale-95 transition-transform"
                       title="Listen to Sujan speak European Portuguese"
                     >
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
@@ -185,9 +185,9 @@ export const AITutorChat: React.FC<AITutorChatProps> = ({ onClose }) => {
 
         {isLoading && (
           <div className="flex items-center gap-2 text-slate-400 text-xs font-bold pl-2">
-            <div className="h-2 w-2 rounded-full bg-[#58cc02] animate-bounce" />
-            <div className="h-2 w-2 rounded-full bg-[#58cc02] animate-bounce [animation-delay:0.2s]" />
-            <div className="h-2 w-2 rounded-full bg-[#58cc02] animate-bounce [animation-delay:0.4s]" />
+            <div className="h-2 w-2 rounded-full bg-[#2563eb] animate-bounce" />
+            <div className="h-2 w-2 rounded-full bg-[#2563eb] animate-bounce [animation-delay:0.2s]" />
+            <div className="h-2 w-2 rounded-full bg-[#2563eb] animate-bounce [animation-delay:0.4s]" />
             <span>Sujan is typing in Portuguese...</span>
           </div>
         )}
@@ -201,7 +201,7 @@ export const AITutorChat: React.FC<AITutorChatProps> = ({ onClose }) => {
           <button
             key={i}
             onClick={() => handleSendMessage(prompt)}
-            className="shrink-0 rounded-full border border-black/5 bg-white px-3 py-1 text-xs font-extrabold text-slate-700 shadow-sm active:scale-95 hover:bg-green-50 hover:text-[#58cc02]"
+            className="shrink-0 rounded-full border border-black/5 bg-white px-3 py-1 text-xs font-extrabold text-slate-700 shadow-sm active:scale-95 hover:bg-blue-50 hover:text-[#2563eb]"
           >
             {prompt}
           </button>
@@ -221,13 +221,13 @@ export const AITutorChat: React.FC<AITutorChatProps> = ({ onClose }) => {
           value={inputText}
           onChange={e => setInputText(e.target.value)}
           placeholder="Write to Sujan in Portuguese..."
-          className="flex-1 rounded-full border border-black/10 bg-slate-100 px-4 py-3 text-sm font-bold text-slate-900 outline-none focus:border-[#58cc02] focus:bg-white"
+          className="flex-1 rounded-full border border-black/10 bg-slate-100 px-4 py-3 text-sm font-bold text-slate-900 outline-none focus:border-[#2563eb] focus:bg-white"
         />
 
         <button
           type="submit"
           disabled={!inputText.trim() || isLoading}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#58cc02] text-white shadow-md active:scale-90 disabled:opacity-40 transition-transform"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#2563eb] text-white shadow-md active:scale-90 disabled:opacity-40 transition-transform"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
         </button>

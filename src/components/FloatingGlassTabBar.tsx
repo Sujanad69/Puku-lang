@@ -14,11 +14,13 @@ export const FloatingGlassTabBar: React.FC<FloatingGlassTabBarProps> = ({
   onChangeTab,
   lang = 'pt',
 }) => {
-  let currentTab: 'learn' | 'style' | 'achievements' = 'learn';
+  let currentTab: 'learn' | 'style' | 'achievements' | 'chat' = 'learn';
   if (activeModal === 'wardrobe') {
     currentTab = 'style';
   } else if (activeModal === 'vault') {
     currentTab = 'achievements';
+  } else if (activeModal === 'chat') {
+    currentTab = 'chat';
   } else {
     currentTab = 'learn';
   }
@@ -32,6 +34,7 @@ export const FloatingGlassTabBar: React.FC<FloatingGlassTabBarProps> = ({
     learn: lang === 'pt' ? 'Aprender' : 'Learn',
     style: lang === 'pt' ? 'Estilo' : 'Style',
     achievements: lang === 'pt' ? 'Conquistas' : 'Vault',
+    chat: lang === 'pt' ? 'Chat' : 'Tutor',
   };
 
   return (
@@ -41,7 +44,7 @@ export const FloatingGlassTabBar: React.FC<FloatingGlassTabBarProps> = ({
         {/* Tab 1: Learn */}
         <button
           onClick={() => handleSelect('none')}
-          className={`relative flex-1 min-w-[95px] flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-black text-xs tracking-tight transition-colors duration-300 cursor-pointer select-none ${
+          className={`relative flex-1 min-w-[95px] flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-semibold text-xs tracking-tight transition-colors duration-300 cursor-pointer select-none ${
             currentTab === 'learn'
               ? 'text-white'
               : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
@@ -50,7 +53,7 @@ export const FloatingGlassTabBar: React.FC<FloatingGlassTabBarProps> = ({
           {currentTab === 'learn' && (
             <motion.div
               layoutId="tab-bubble"
-              className="absolute inset-0 bg-[#58cc02] rounded-xl shadow-none"
+              className="absolute inset-0 bg-[#2563eb] rounded-xl shadow-none"
               transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
             />
           )}
@@ -63,7 +66,7 @@ export const FloatingGlassTabBar: React.FC<FloatingGlassTabBarProps> = ({
         {/* Tab 2: Style */}
         <button
           onClick={() => handleSelect('wardrobe')}
-          className={`relative flex-1 min-w-[95px] flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-black text-xs tracking-tight transition-colors duration-300 cursor-pointer select-none ${
+          className={`relative flex-1 min-w-[95px] flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-semibold text-xs tracking-tight transition-colors duration-300 cursor-pointer select-none ${
             currentTab === 'style'
               ? 'text-white'
               : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
@@ -85,7 +88,7 @@ export const FloatingGlassTabBar: React.FC<FloatingGlassTabBarProps> = ({
         {/* Tab 3: Achievements */}
         <button
           onClick={() => handleSelect('vault')}
-          className={`relative flex-1 min-w-[95px] flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-black text-xs tracking-tight transition-colors duration-300 cursor-pointer select-none ${
+          className={`relative flex-1 min-w-[95px] flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-semibold text-xs tracking-tight transition-colors duration-300 cursor-pointer select-none ${
             currentTab === 'achievements'
               ? 'text-white'
               : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'

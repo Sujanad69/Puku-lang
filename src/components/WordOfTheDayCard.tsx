@@ -11,7 +11,7 @@ export const WordOfTheDayCard: React.FC = () => {
   };
 
   return (
-    <div className="wotd-card relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#58cc02] to-[#46a302] p-6 text-white shadow-[0_12px_30px_rgba(88,204,2,0.3)] flex justify-between items-center mb-6">
+    <div className="wotd-card relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#2563eb] to-[#1d4ed8] p-6 text-white shadow-[0_12px_30px_rgba(88,204,2,0.3)] flex justify-between items-center mb-6">
       {/* Lisbon Bridge SVG Background */}
       <svg
         className="pointer-events-none absolute bottom-0 left-0 h-[75%] w-full opacity-15 z-[1]"
@@ -38,10 +38,10 @@ export const WordOfTheDayCard: React.FC = () => {
       </svg>
 
       <div className="relative z-[5]">
-        <div className="text-[0.75rem] font-extrabold uppercase tracking-[1px] text-white/90 mb-1">
+        <div className="text-[0.75rem] font-semibold uppercase tracking-[1px] text-white/90 mb-1">
           Word of the Day
         </div>
-        <div className="text-[1.6rem] font-black text-white leading-[1.1]">
+        <div className="text-[1.6rem] font-bold text-white leading-[1.1]">
           {wotd.pt}
         </div>
         <div className="text-[0.95rem] font-semibold text-white/90 mt-1">
@@ -51,7 +51,7 @@ export const WordOfTheDayCard: React.FC = () => {
 
       <button
         onClick={handleSpeak}
-        className="relative z-[5] flex h-[54px] w-[54px] min-w-[54px] items-center justify-center rounded-full bg-white text-[#46a302] shadow-[0_4px_15px_rgba(0,0,0,0.1)] transition-transform active:scale-90 cursor-pointer"
+        className="relative z-[5] flex h-[54px] w-[54px] min-w-[54px] items-center justify-center rounded-full bg-white text-[#1d4ed8] shadow-[0_4px_15px_rgba(0,0,0,0.1)] transition-transform active:scale-90 cursor-pointer"
         title="Listen to European Portuguese Pronunciation"
       >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>

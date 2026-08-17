@@ -1,12 +1,12 @@
 import { UserProgress, VocabWord } from '../types';
 import { OUTFITS_DATA } from '../data/outfitsData';
 
-const STORAGE_KEY = 'portuguese_puku_progress_v2';
+const STORAGE_KEY = 'portuguese_puku_progress_v3';
 
 export const INITIAL_PROGRESS: UserProgress = {
-  xp: 40,
-  coins: 120,
-  gems: 2,
+  xp: 0,
+  coins: 0,
+  gems: 0,
   hearts: 5,
   streak: 1,
   lastPlayDate: new Date().toISOString().split('T')[0],
@@ -14,10 +14,12 @@ export const INITIAL_PROGRESS: UserProgress = {
   currentOutfitId: 'base',
   weakWords: [],
   masteredWords: [],
-  todayXP: 40,
+  todayXP: 0,
   dailyGoalXP: 50,
   remindersEnabled: true,
   themeDark: true,
+  completedUnits: [],
+  completedLessons: {},
 };
 
 export function loadUserProgress(): UserProgress {
@@ -53,6 +55,7 @@ function checkDailyReset(progress: UserProgress): UserProgress {
     let newStreak = progress.streak;
     if (last === yesterdayStr) {
       // Continued streak!
+      newStreak += 1;
     } else if (last < yesterdayStr) {
       // Missed a day
       if (progress.streakFrozen) {

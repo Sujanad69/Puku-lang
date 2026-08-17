@@ -1,0 +1,31 @@
+{
+  "entities": {
+    "UserProgress": {
+      "title": "UserProgress",
+      "description": "User profile and progress",
+      "type": "object",
+      "properties": {
+        "xp": { "type": "number" },
+        "todayXP": { "type": "number" },
+        "coins": { "type": "number" },
+        "gems": { "type": "number" },
+        "hearts": { "type": "number" },
+        "streak": { "type": "number" },
+        "level": { "type": "number" },
+        "hasSeenOnboarding": { "type": "boolean" },
+        "activeAvatarId": { "type": "string", "maxLength": 100 },
+        "completedUnits": { "type": "array", "items": { "type": "string" } },
+        "weakWords": { "type": "array", "items": { "type": "string" } },
+        "lastActiveDate": { "type": "string", "maxLength": 30 },
+        "completedLessons": { "type": "object", "additionalProperties": { "type": "number" } }
+      },
+      "required": ["xp", "coins"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "UserProgress",
+      "description": "User progress collection"
+    }
+  }
+}

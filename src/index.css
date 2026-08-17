@@ -6,8 +6,8 @@
   --bg-color: #f2f2f7;
   --text-main: #1c1c1e;
   --text-muted: #8e8e93;
-  --accent: #58cc02;
-  --accent-dark: #46a302;
+  --accent: #2563eb;
+  --accent-dark: #1d4ed8;
   --pt-red: #ff3b30;
   --gold: #ff9600;
   --gem: #b250ff;
@@ -40,9 +40,9 @@ html.dark, html.dark body {
 }
 
 @keyframes learnPulse {
-  0% { transform: scale(0.96); box-shadow: 0 0 0 0 rgba(88, 204, 2, 0.4); border-color: var(--accent); }
-  70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(88, 204, 2, 0); border-color: var(--accent); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(88, 204, 2, 0); border-color: rgba(0,0,0,0.05); }
+  0% { transform: scale(0.96); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); border-color: var(--accent); }
+  70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); border-color: var(--accent); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); border-color: rgba(0,0,0,0.05); }
 }
 
 @keyframes ldrPulse {
@@ -61,7 +61,7 @@ html.dark, html.dark body {
 
 .learning-pulse {
   animation: learnPulse 0.6s ease-out forwards;
-  background: rgba(88, 204, 2, 0.05) !important;
+  background: rgba(37, 99, 235, 0.05) !important;
 }
 
 .ldr-pulse {
@@ -77,4 +77,8 @@ html.dark, html.dark body {
 .no-scrollbar {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
+}
+
+model-viewer::part(default-progress-bar) {
+  display: none;
 }

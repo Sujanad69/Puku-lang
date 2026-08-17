@@ -13,7 +13,7 @@ export const OUTFITS_DATA: OutfitItem[] = [
   {
     id: 'm9',
     name: 'Graphite Tee',
-    cost: 50,
+    cost: 100,
     currency: 'coin',
     thumb: 'https://sujanad69.github.io/Pukumodel/9-tshirt.WEBP',
     url: 'https://sujanad69.github.io/Pukumodel/model%209.glb',
@@ -22,7 +22,7 @@ export const OUTFITS_DATA: OutfitItem[] = [
   {
     id: 'm6',
     name: 'Breeze Linen Shirt',
-    cost: 100,
+    cost: 250,
     currency: 'coin',
     thumb: 'https://sujanad69.github.io/Pukumodel/6-Summer%20Shirt.WEBP',
     url: 'https://sujanad69.github.io/Pukumodel/model%206.glb',
@@ -31,7 +31,7 @@ export const OUTFITS_DATA: OutfitItem[] = [
   {
     id: 'm2',
     name: 'Classic Kurti',
-    cost: 150,
+    cost: 400,
     currency: 'coin',
     thumb: 'https://sujanad69.github.io/Pukumodel/2-kurti.PNG',
     url: 'https://sujanad69.github.io/Pukumodel/model%202.glb',
@@ -40,7 +40,7 @@ export const OUTFITS_DATA: OutfitItem[] = [
   {
     id: 'm1',
     name: 'Cognac Leather Jacket',
-    cost: 200,
+    cost: 600,
     currency: 'coin',
     thumb: 'https://sujanad69.github.io/Pukumodel/1-brown%20leather%20jacket.PNG',
     url: 'https://sujanad69.github.io/Pukumodel/Model%201.glb',
@@ -49,7 +49,7 @@ export const OUTFITS_DATA: OutfitItem[] = [
   {
     id: 'm7',
     name: 'Midnight Moto Biker',
-    cost: 300,
+    cost: 850,
     currency: 'coin',
     thumb: 'https://sujanad69.github.io/Pukumodel/7-Black%20leather%20jacket.WEBP',
     url: 'https://sujanad69.github.io/Pukumodel/model%207.glb',
@@ -58,7 +58,7 @@ export const OUTFITS_DATA: OutfitItem[] = [
   {
     id: 'm3',
     name: 'Tactical Camo Utility',
-    cost: 400,
+    cost: 1100,
     currency: 'coin',
     thumb: 'https://sujanad69.github.io/Pukumodel/3-Army.PNG',
     url: 'https://sujanad69.github.io/Pukumodel/model%203.glb',
@@ -67,7 +67,7 @@ export const OUTFITS_DATA: OutfitItem[] = [
   {
     id: 'm4',
     name: 'Aviator Flight Suit',
-    cost: 500,
+    cost: 1500,
     currency: 'coin',
     thumb: 'https://sujanad69.github.io/Pukumodel/4-Pilot.PNG',
     url: 'https://sujanad69.github.io/Pukumodel/model%204.glb',
@@ -76,7 +76,7 @@ export const OUTFITS_DATA: OutfitItem[] = [
   {
     id: 'm5',
     name: 'Navy Tailored Suit',
-    cost: 600,
+    cost: 2000,
     currency: 'coin',
     thumb: 'https://sujanad69.github.io/Pukumodel/5-Navy%20Blue%20Suit.WEBP',
     url: 'https://sujanad69.github.io/Pukumodel/model%205.glb',
@@ -85,7 +85,7 @@ export const OUTFITS_DATA: OutfitItem[] = [
   {
     id: 'm8',
     name: 'Onyx Black Tuxedo',
-    cost: 800,
+    cost: 3000,
     currency: 'coin',
     thumb: 'https://sujanad69.github.io/Pukumodel/8-Black%20Suit.WEBP',
     url: 'https://sujanad69.github.io/Pukumodel/model%208.glb',
@@ -94,7 +94,7 @@ export const OUTFITS_DATA: OutfitItem[] = [
   {
     id: 'm10',
     name: 'Dark Fae Butterfly',
-    cost: 5,
+    cost: 10,
     currency: 'gem',
     thumb: 'https://sujanad69.github.io/Pukumodel/10-Experimental%20butterfly.WEBP',
     url: 'https://sujanad69.github.io/Pukumodel/model%2010.glb',
@@ -103,10 +103,10 @@ export const OUTFITS_DATA: OutfitItem[] = [
   {
     id: 'm11',
     name: 'Shadow Ronin Armor',
-    cost: 10,
+    cost: 25,
     currency: 'gem',
     thumb: 'https://sujanad69.github.io/Pukumodel/11-Experimental%20Samurai.WEBP',
     url: 'https://sujanad69.github.io/Pukumodel/model%2011.glb',
-    description: 'Ultimate legendary outfit: Custom samurai ronin battle suit unlocked with 10 Gems!'
+    description: 'Ultimate legendary outfit: Custom samurai ronin battle suit unlocked with 25 Gems!'
   }
 ];
