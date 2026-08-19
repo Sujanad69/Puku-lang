@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { CULTURE_ARTICLES } from '../data/portugueseData';
 import { speakPt, playTone } from '../utils/audio';
+import { triggerHaptic } from '../utils/haptics';
+import { X, Volume2, Sparkles, Compass, BookOpen, Check } from 'lucide-react';
+import { FlagPortugal } from './icons/PremiumIcons';
 
 interface CultureGuidesModalProps {
   onClose: () => void;
@@ -8,98 +11,157 @@ interface CultureGuidesModalProps {
 
 export const CultureGuidesModal: React.FC<CultureGuidesModalProps> = ({ onClose }) => {
   const [activeTab, setActiveTab] = useState(CULTURE_ARTICLES[0].id);
+  const [playingPhrase, setPlayingPhrase] = useState<string | null>(null);
 
   const activeArticle = CULTURE_ARTICLES.find(a => a.id === activeTab) || CULTURE_ARTICLES[0];
 
   const handleSpeakPhrase = (text: string) => {
-    playTone(550, 'sine', 0.08);
+    playTone(550, 'sine', 0.06);
+    triggerHaptic('light');
+    setPlayingPhrase(text);
     speakPt(text);
+    setTimeout(() => setPlayingPhrase(null), 2500);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[#f4f5f8] overflow-hidden animate-in fade-in duration-200">
-      {/* Top Header */}
-      <div className="flex items-center justify-between border-b border-black/5 bg-white px-4 py-3 shadow-sm pt-safe">
-        <button
-          onClick={onClose}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500 active:scale-90"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-        </button>
-
-        <div className="text-center">
-          <h2 className="text-base font-extrabold text-slate-900">Culture & Guides</h2>
-          <p className="text-xs font-semibold text-slate-400">European Portuguese Insights</p>
-        </div>
-
-        <div className="w-10" />
-      </div>
-
-      {/* Tabs Bar */}
-      <div className="flex gap-2 overflow-x-auto p-3 bg-white border-b border-black/5 no-scrollbar">
-        {CULTURE_ARTICLES.map(article => {
-          const isActive = activeTab === article.id;
-
-          return (
-            <button
-              key={article.id}
-              onClick={() => setActiveTab(article.id)}
-              className={`shrink-0 rounded-full px-4 py-2 text-xs font-extrabold transition-all active:scale-95 ${
-                isActive
-                  ? 'bg-[#2563eb] text-white shadow-md shadow-blue-500/20'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              {article.title}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Article Content */}
-      <div className="flex-1 overflow-y-auto p-4 max-w-md mx-auto w-full space-y-4">
-        <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-sm space-y-4">
-          <div className="flex items-center gap-2 text-[#2563eb] font-black text-xl">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-            <h3>{activeArticle.title}</h3>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-xl ios-fade-in">
+      
+      <div className="relative w-full max-w-2xl overflow-hidden rounded-[36px] bg-white dark:bg-[#12141a] border border-slate-200/60 dark:border-slate-800/80 shadow-2xl flex flex-col max-h-[92vh] ios-modal-scale-in">
+        
+        {/* ================= HEADER BANNER ================= */}
+        <div className="relative bg-gradient-to-br from-[#0369a1] via-[#0284c7] to-[#0ea5e9] p-6 text-white text-center overflow-hidden shrink-0">
+          
+          {/* Subtle Glows */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden select-none opacity-20">
+            <div className="absolute -top-10 -right-10 w-44 h-44 bg-sky-200 rounded-full blur-2xl"></div>
+            <div className="absolute -bottom-10 -left-10 w-44 h-44 bg-cyan-300 rounded-full blur-2xl"></div>
           </div>
 
-          <div className="text-slate-700 text-sm font-medium leading-relaxed space-y-3">
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 h-9 w-9 rounded-full bg-black/20 hover:bg-black/30 flex items-center justify-center text-white transition-colors cursor-pointer backdrop-blur-md"
+            title="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
+
+          {/* Pill Badge */}
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3.5 py-1 text-[11px] font-extrabold uppercase tracking-wider backdrop-blur-md border border-white/20 mb-2 shadow-xs">
+            <Compass className="w-3.5 h-3.5 text-sky-200" />
+            <span>Culture & Guides • Portugal Insights</span>
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight flex items-center justify-center gap-2">
+            <span>Cultura Portuguesa</span>
+            <FlagPortugal size={24} />
+          </h2>
+
+          <p className="text-xs sm:text-sm text-sky-100 font-medium mt-1 max-w-md mx-auto leading-relaxed">
+            Essential etiquette, Lisbon habits, dining rituals, and playful tongue twisters.
+          </p>
+
+          {/* Navigation Pill Tabs */}
+          <div className="flex gap-2 overflow-x-auto p-1 mt-4 rounded-2xl bg-black/20 backdrop-blur-md max-w-lg mx-auto no-scrollbar">
+            {CULTURE_ARTICLES.map(article => {
+              const isActive = activeTab === article.id;
+              return (
+                <button
+                  key={article.id}
+                  onClick={() => {
+                    playTone(600, 'sine', 0.03);
+                    setActiveTab(article.id);
+                  }}
+                  className={`shrink-0 py-1.5 px-3.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                    isActive
+                      ? 'bg-white text-sky-700 shadow-md scale-[1.02]'
+                      : 'text-white/80 hover:text-white'
+                  }`}
+                >
+                  <BookOpen className="w-3 h-3" />
+                  <span>{article.title}</span>
+                </button>
+              );
+            })}
+          </div>
+
+        </div>
+
+        {/* ================= CONTENT BODY ================= */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+          
+          <div className="rounded-3xl border border-sky-100 dark:border-sky-950 bg-slate-50 dark:bg-[#181a22] p-6 space-y-4 shadow-sm">
+            
+            <div className="flex items-center gap-2.5 text-sky-600 dark:text-sky-400 font-black text-lg border-b border-slate-200/60 dark:border-slate-800 pb-3">
+              <Sparkles className="w-5 h-5 text-amber-500" />
+              <h3>{activeArticle.title}</h3>
+            </div>
+
             {activeArticle.id === 'tongue' ? (
               <div className="space-y-3">
-                <p className="text-xs font-bold text-slate-500">
-                  Tap any tongue twister below to listen and practice your Portuguese cadence!
+                <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                  Tap any tongue twister (trava-línguas) to listen and test your Lisbon cadence!
                 </p>
 
                 {[
                   { pt: 'O rato roeu a rolha da garrafa do rei da Rússia.', en: 'The mouse gnawed the cork of the King of Russia’s bottle.' },
                   { pt: 'Três pratos de trigo para três tigres tristes.', en: 'Three plates of wheat for three sad tigers.' },
                   { pt: 'A aranha arranha a rã. A rã arranha a aranha.', en: 'The spider scratches the frog. The frog scratches the spider.' },
-                ].map((item, idx) => (
-                  <div
-                    key={idx}
-                    onClick={() => handleSpeakPhrase(item.pt)}
-                    className="flex items-center justify-between rounded-2xl border border-black/5 bg-slate-50 p-4 cursor-pointer hover:bg-blue-50 transition-colors"
-                  >
-                    <div>
-                      <p className="text-sm font-extrabold text-slate-900">{item.pt}</p>
-                      <p className="text-xs font-medium text-slate-500 mt-0.5">"{item.en}"</p>
-                    </div>
+                ].map((item, idx) => {
+                  const isPlaying = playingPhrase === item.pt;
+                  return (
+                    <div
+                      key={idx}
+                      onClick={() => handleSpeakPhrase(item.pt)}
+                      className={`flex items-center justify-between p-4 rounded-2xl border transition-all cursor-pointer ${
+                        isPlaying
+                          ? 'bg-sky-50 dark:bg-sky-950/40 border-sky-400 shadow-sm'
+                          : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 hover:border-sky-300'
+                      }`}
+                    >
+                      <div className="space-y-0.5 flex-1 pr-3">
+                        <p className="text-sm font-black text-slate-900 dark:text-white">{item.pt}</p>
+                        <p className="text-xs font-medium text-slate-500 dark:text-slate-400">"{item.en}"</p>
+                      </div>
 
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#2563eb] text-white shadow-sm">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                      <button className={`h-9 w-9 shrink-0 flex items-center justify-center rounded-full transition-all ${
+                        isPlaying
+                          ? 'bg-sky-600 text-white ring-4 ring-sky-300'
+                          : 'bg-sky-100 dark:bg-sky-900/50 text-sky-600 dark:text-sky-300'
+                      }`}>
+                        <Volume2 className="w-4 h-4" />
+                      </button>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
-              <div className="whitespace-pre-line text-sm leading-relaxed text-slate-700">
+              <div className="whitespace-pre-line text-sm leading-relaxed text-slate-700 dark:text-slate-300 font-medium">
                 {activeArticle.content.trim()}
               </div>
             )}
+
           </div>
+
         </div>
+
+        {/* ================= FOOTER ================= */}
+        <div className="p-4 sm:p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-[#0e1015] shrink-0 flex items-center justify-between gap-3">
+          <span className="text-xs text-sky-600 dark:text-sky-400 font-bold flex items-center gap-1.5">
+            <Compass className="w-4 h-4" />
+            <span>Discover Portugal</span>
+          </span>
+
+          <button
+            onClick={onClose}
+            className="py-2.5 px-5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs transition-all shadow-sm active:scale-95 cursor-pointer"
+          >
+            Close Guide
+          </button>
+        </div>
+
       </div>
+
     </div>
   );
 };

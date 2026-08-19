@@ -1,11 +1,13 @@
 import React from 'react';
 import { ActiveModal } from '../types';
 import { playTone } from '../utils/audio';
+import { triggerHaptic } from '../utils/haptics';
 import { motion } from 'motion/react';
+import { Activity } from 'lucide-react';
 
 interface FloatingGlassTabBarProps {
   activeModal: ActiveModal;
-  onChangeTab: (tab: ActiveModal) => void;
+  onChangeTab: (modal: ActiveModal) => void;
   lang?: 'pt' | 'en';
 }
 
@@ -14,96 +16,105 @@ export const FloatingGlassTabBar: React.FC<FloatingGlassTabBarProps> = ({
   onChangeTab,
   lang = 'pt',
 }) => {
-  let currentTab: 'learn' | 'style' | 'achievements' | 'chat' = 'learn';
+  let currentTab: 'learn' | 'style' | 'activity' = 'learn';
   if (activeModal === 'wardrobe') {
     currentTab = 'style';
   } else if (activeModal === 'vault') {
-    currentTab = 'achievements';
-  } else if (activeModal === 'chat') {
-    currentTab = 'chat';
+    currentTab = 'activity';
   } else {
     currentTab = 'learn';
   }
 
-  const handleSelect = (targetModal: ActiveModal) => {
+  const handleSelect = (target: 'learn' | 'style' | 'activity') => {
     playTone(550, 'sine', 0.04);
-    onChangeTab(targetModal);
+    triggerHaptic('light');
+    if (target === 'learn') {
+      onChangeTab('none');
+    } else if (target === 'style') {
+      onChangeTab('wardrobe');
+    } else if (target === 'activity') {
+      onChangeTab('vault');
+    }
   };
 
   const labels = {
     learn: lang === 'pt' ? 'Aprender' : 'Learn',
     style: lang === 'pt' ? 'Estilo' : 'Style',
-    achievements: lang === 'pt' ? 'Conquistas' : 'Vault',
-    chat: lang === 'pt' ? 'Chat' : 'Tutor',
+    activity: lang === 'pt' ? 'Atividade' : 'Activity',
   };
 
   return (
-    <div className="fixed bottom-0 left-0 w-full z-[9999]">
-      <nav className="flex items-center justify-center sm:justify-center md:gap-4 gap-2 px-4 py-3 sm:py-4 bg-white dark:bg-black border-t border-black/10 dark:border-white/10 pb-[max(env(safe-area-inset-bottom),0.75rem)] w-full">
+    <div className="fixed bottom-0 left-0 w-full z-[9999] pointer-events-none">
+      <nav className="pointer-events-auto flex items-center justify-center max-w-lg mx-auto sm:max-w-md md:gap-3 gap-1.5 px-3.5 py-2.5 bg-white/80 dark:bg-[#1c1c1e]/85 backdrop-blur-2xl border-t border-black/[0.08] dark:border-white/[0.1] rounded-t-[24px] shadow-[0_-10px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_-12px_40px_rgba(0,0,0,0.7)] pb-[max(env(safe-area-inset-bottom),0.75rem)] w-full">
         
         {/* Tab 1: Learn */}
         <button
-          onClick={() => handleSelect('none')}
-          className={`relative flex-1 min-w-[95px] flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-semibold text-xs tracking-tight transition-colors duration-300 cursor-pointer select-none ${
+          onClick={() => handleSelect('learn')}
+          className={`relative flex-1 min-w-[85px] flex items-center justify-center gap-1.5 px-3 py-2 rounded-[14px] font-semibold text-xs tracking-tight transition-all duration-200 cursor-pointer select-none active:scale-95 ${
             currentTab === 'learn'
               ? 'text-white'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
+              : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
           {currentTab === 'learn' && (
             <motion.div
-              layoutId="tab-bubble"
-              className="absolute inset-0 bg-[#2563eb] rounded-xl shadow-none"
-              transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+              layoutId="ios-tab-pill"
+              className="absolute inset-0 bg-[#0a84ff] rounded-[14px] shadow-[0_4px_14px_rgba(10,132,255,0.45)]"
+              transition={{ type: 'spring', bounce: 0.18, duration: 0.5 }}
             />
           )}
           <span className="relative z-10 flex items-center gap-1.5">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-            <span>{labels.learn}</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+            <span className="font-bold">{labels.learn}</span>
           </span>
         </button>
 
         {/* Tab 2: Style */}
         <button
-          onClick={() => handleSelect('wardrobe')}
-          className={`relative flex-1 min-w-[95px] flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-semibold text-xs tracking-tight transition-colors duration-300 cursor-pointer select-none ${
+          onClick={() => handleSelect('style')}
+          className={`relative flex-1 min-w-[85px] flex items-center justify-center gap-1.5 px-3 py-2 rounded-[14px] font-semibold text-xs tracking-tight transition-all duration-200 cursor-pointer select-none active:scale-95 ${
             currentTab === 'style'
               ? 'text-white'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
+              : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
           {currentTab === 'style' && (
             <motion.div
-              layoutId="tab-bubble"
-              className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl shadow-none"
-              transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+              layoutId="ios-tab-pill"
+              className="absolute inset-0 bg-gradient-to-r from-[#ff9f0a] to-[#ff375f] rounded-[14px] shadow-[0_4px_14px_rgba(255,159,10,0.45)]"
+              transition={{ type: 'spring', bounce: 0.18, duration: 0.5 }}
             />
           )}
           <span className="relative z-10 flex items-center gap-1.5">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
-            <span>{labels.style}</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/>
+            </svg>
+            <span className="font-bold">{labels.style}</span>
           </span>
         </button>
 
-        {/* Tab 3: Achievements */}
+        {/* Tab 3: Activity */}
         <button
-          onClick={() => handleSelect('vault')}
-          className={`relative flex-1 min-w-[95px] flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-semibold text-xs tracking-tight transition-colors duration-300 cursor-pointer select-none ${
-            currentTab === 'achievements'
+          onClick={() => handleSelect('activity')}
+          className={`relative flex-1 min-w-[85px] flex items-center justify-center gap-1.5 px-3 py-2 rounded-[14px] font-semibold text-xs tracking-tight transition-all duration-200 cursor-pointer select-none active:scale-95 ${
+            currentTab === 'activity'
               ? 'text-white'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
+              : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
-          {currentTab === 'achievements' && (
+          {currentTab === 'activity' && (
             <motion.div
-              layoutId="tab-bubble"
-              className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl shadow-none"
-              transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+              layoutId="ios-tab-pill"
+              className="absolute inset-0 bg-gradient-to-r from-[#bf5af2] to-[#5e5ce6] rounded-[14px] shadow-[0_4px_14px_rgba(191,90,242,0.45)]"
+              transition={{ type: 'spring', bounce: 0.18, duration: 0.5 }}
             />
           )}
           <span className="relative z-10 flex items-center gap-1.5">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7c0 3.31 2.69 6 6 6s6-2.69 6-6V2z"/></svg>
-            <span>{labels.achievements}</span>
+            <Activity className="w-4 h-4" strokeWidth={2.4} />
+            <span className="font-bold">{labels.activity}</span>
           </span>
         </button>
       </nav>

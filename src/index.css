@@ -1,84 +1,521 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: "Courier New", Courier, ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+}
+
 @variant dark (&:where(.dark, .dark *));
 
+/* ==========================================================================
+   APPLE DESIGN AWARD SYSTEM TOKENS (NATIVE iOS NIGHT THEME & BLUE ACCENTS)
+   ========================================================================== */
+
 :root {
-  --bg-color: #f2f2f7;
-  --text-main: #1c1c1e;
-  --text-muted: #8e8e93;
-  --accent: #2563eb;
-  --accent-dark: #1d4ed8;
-  --pt-red: #ff3b30;
-  --gold: #ff9600;
-  --gem: #b250ff;
+  /* Ultra-Premium Sleek Courier Typography Stack */
+  --ios-font-stack: "Courier New", Courier, ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  --ios-font-mono: "Courier New", Courier, monospace;
+  --ios-font-display: "Courier New", Courier, monospace;
+  
+  /* iOS System Colors (Light / Default) */
+  --ios-system-blue: #007aff;
+  --ios-system-blue-rgb: 0, 122, 255;
+  --ios-system-blue-elevated: #0a84ff;
+  --ios-system-blue-subtle: rgba(0, 122, 255, 0.08);
+  --ios-system-blue-glow: rgba(0, 122, 255, 0.28);
+  
+  --ios-system-indigo: #5856d6;
+  --ios-system-purple: #af52de;
+  --ios-system-pink: #ff2d55;
+  --ios-system-red: #ff3b30;
+  --ios-system-orange: #ff9500;
+  --ios-system-yellow: #ffcc00;
+  --ios-system-green: #34c759;
+  --ios-system-mint: #00c7be;
+  --ios-system-teal: #30b0c7;
+  --ios-system-cyan: #32ade6;
+
+  /* Surfaces & Backgrounds (Light) */
+  --ios-bg-primary: #f2f2f7;
+  --ios-bg-secondary: #ffffff;
+  --ios-bg-tertiary: #e5e5ea;
+  --ios-bg-grouped: #f2f2f7;
+  
+  /* Labels (Light) */
+  --ios-label-primary: #000000;
+  --ios-label-secondary: rgba(60, 60, 67, 0.6);
+  --ios-label-tertiary: rgba(60, 60, 67, 0.3);
+  --ios-label-quaternary: rgba(60, 60, 67, 0.18);
+  
+  /* Separators & Materials */
+  --ios-separator: rgba(60, 60, 67, 0.12);
+  --ios-separator-opaque: #c6c6c8;
+  --ios-glass-bg: rgba(255, 255, 255, 0.78);
+  --ios-glass-border: rgba(255, 255, 255, 0.65);
+  --ios-glass-specular: inset 0 1px 0 0 rgba(255, 255, 255, 0.85);
+
+  /* iOS Continuous Curves & Physics Spring Curves */
+  --ios-radius-sm: 10px;
+  --ios-radius-md: 14px;
+  --ios-radius-lg: 18px;
+  --ios-radius-xl: 24px;
+  --ios-radius-2xl: 32px;
+  
+  --ios-spring-snappy: cubic-bezier(0.25, 1, 0.5, 1);
+  --ios-spring-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.15);
+  --ios-spring-gentle: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* ==========================================================================
+   APPLE OLED NIGHT DARK THEME (True OLED Black + Deep Zinc Surfaces #1C1C1E - #2C2C2E)
+   ========================================================================== */
+
+html.dark, html.dark body, :root.dark {
+  /* iOS System Colors (Dark Mode Vibrancy) */
+  --ios-system-blue: #0a84ff;
+  --ios-system-blue-rgb: 10, 132, 255;
+  --ios-system-blue-elevated: #3898ff;
+  --ios-system-blue-subtle: rgba(10, 132, 255, 0.14);
+  --ios-system-blue-glow: rgba(10, 132, 255, 0.38);
+
+  --ios-system-indigo: #5e5ce6;
+  --ios-system-purple: #bf5af2;
+  --ios-system-pink: #ff375f;
+  --ios-system-red: #ff453a;
+  --ios-system-orange: #ff9f0a;
+  --ios-system-yellow: #ffd60a;
+  --ios-system-green: #30d158;
+  --ios-system-mint: #63e6e2;
+  --ios-system-teal: #40c8e0;
+  --ios-system-cyan: #64d2ff;
+
+  /* True OLED Black & HIG Elevated Surfaces */
+  --ios-bg-primary: #000000;
+  --ios-bg-secondary: #1c1c1e;
+  --ios-bg-tertiary: #2c2c2e;
+  --ios-bg-grouped: #000000;
+  --ios-bg-elevated: #3a3a3c;
+
+  /* Labels (Dark Mode Vibrancy) */
+  --ios-label-primary: #ffffff;
+  --ios-label-secondary: rgba(235, 235, 245, 0.65);
+  --ios-label-tertiary: rgba(235, 235, 245, 0.35);
+  --ios-label-quaternary: rgba(235, 235, 245, 0.18);
+
+  /* Separators & Specular Edge Insets */
+  --ios-separator: rgba(84, 84, 88, 0.35);
+  --ios-separator-opaque: #38383a;
+  --ios-glass-bg: rgba(28, 28, 30, 0.82);
+  --ios-glass-border: rgba(255, 255, 255, 0.09);
+  --ios-glass-specular: inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+}
+
+/* ==========================================================================
+   GLOBAL BASE & NATIVE iOS FEEL
+   ========================================================================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html, body {
   margin: 0;
   padding: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
-  background-color: #f8f9fa;
-  color: #1c1c1e;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: var(--ios-font-stack);
+  background-color: #f2f2f7;
+  color: var(--ios-label-primary);
+  letter-spacing: -0.015em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  transition: background-color 0.35s var(--ios-spring-gentle), color 0.35s var(--ios-spring-gentle);
 }
 
 html.dark, html.dark body {
   background-color: #000000;
-  color: #f8fafc;
+  color: #ffffff;
   color-scheme: dark;
 }
 
-@keyframes floatCloud {
-  0% { right: -60px; }
-  100% { right: 120%; }
+/* Crisp SF-Symbol-like SVG Icon Graphics */
+svg {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  shape-rendering: geometricPrecision;
 }
 
-@keyframes floatUp {
-  0% { transform: translateY(10px) scale(0.8); opacity: 0; }
-  50% { opacity: 1; }
-  100% { transform: translateY(-40px) scale(1.1); opacity: 0; }
+/* Native Tap Response on Clickable Elements */
+button, a, [role="button"] {
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 0.18s var(--ios-spring-bounce), opacity 0.18s ease, filter 0.18s ease;
 }
 
-@keyframes learnPulse {
-  0% { transform: scale(0.96); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); border-color: var(--accent); }
-  70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); border-color: var(--accent); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); border-color: rgba(0,0,0,0.05); }
+button:active, a:active, [role="button"]:active {
+  transform: scale(0.962);
+  opacity: 0.9;
 }
 
-@keyframes ldrPulse {
-  0% { transform: scale(0.96); box-shadow: 0 0 0 0 rgba(255, 42, 133, 0.4); border-color: #ff2a85; }
-  70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(255, 42, 133, 0); border-color: #ff2a85; }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 42, 133, 0); border-color: rgba(0,0,0,0.05); }
+/* Smooth native momentum scrolling */
+.smooth-scroll, * {
+  -webkit-overflow-scrolling: touch;
 }
 
-.wotd-cloud-anim {
-  animation: floatCloud 25s linear infinite;
-}
-
-.ldr-heart-anim {
-  animation: floatUp 4s ease-in-out infinite;
-}
-
-.learning-pulse {
-  animation: learnPulse 0.6s ease-out forwards;
-  background: rgba(37, 99, 235, 0.05) !important;
-}
-
-.ldr-pulse {
-  animation: ldrPulse 0.6s ease-out forwards;
-  background: rgba(255, 42, 133, 0.05) !important;
-}
-
-/* Hide scrollbar for Chrome, Safari and Opera */
+/* Hide scrollbars elegantly */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
-/* Hide scrollbar for IE, Edge and Firefox */
 .no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
+
+/* ==========================================================================
+   NATIVE iOS GLASS & SURFACE ELEVATION CLASSES
+   ========================================================================== */
+
+/* Apple Ultra-Thin Frosted Glass Material */
+.ios-glass {
+  background: var(--ios-glass-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--ios-glass-border);
+  box-shadow: var(--ios-glass-specular), 0 8px 32px 0 rgba(0, 0, 0, 0.22);
+}
+
+/* Apple HIG Continuous Curve Surface */
+.ios-card {
+  background: var(--ios-bg-secondary);
+  border: 1px solid var(--ios-separator);
+  border-radius: var(--ios-radius-xl);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  transition: transform 0.24s var(--ios-spring-snappy), box-shadow 0.24s var(--ios-spring-snappy), border-color 0.24s ease;
+}
+
+.dark .ios-card {
+  background: #1c1c1e;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.06), 0 10px 30px -5px rgba(0, 0, 0, 0.65);
+}
+
+.ios-card:hover {
+  border-color: rgba(10, 132, 255, 0.35);
+  box-shadow: 0 12px 36px -4px rgba(10, 132, 255, 0.12);
+}
+
+/* iOS Primary System Blue Gradient Button */
+.ios-btn-primary {
+  background: linear-gradient(135deg, #0a84ff 0%, #0066ff 100%);
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  border-radius: var(--ios-radius-md);
+  box-shadow: 0 4px 14px -1px rgba(10, 132, 255, 0.42), inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ios-btn-primary:hover {
+  background: linear-gradient(135deg, #3898ff 0%, #0a84ff 100%);
+  box-shadow: 0 6px 20px 0 rgba(10, 132, 255, 0.55), inset 0 1px 0 0 rgba(255, 255, 255, 0.35);
+}
+
+/* iOS Secondary Glass Button */
+.ios-btn-secondary {
+  background: rgba(10, 132, 255, 0.12);
+  color: var(--ios-system-blue);
+  font-weight: 600;
+  border-radius: var(--ios-radius-md);
+  border: 1px solid rgba(10, 132, 255, 0.22);
+}
+
+.ios-btn-secondary:hover {
+  background: rgba(10, 132, 255, 0.2);
+  border-color: rgba(10, 132, 255, 0.4);
+}
+
+/* Apple Segmented Control Bar */
+.ios-segmented-control {
+  background: rgba(118, 118, 128, 0.14);
+  border-radius: var(--ios-radius-md);
+  padding: 3px;
+  display: inline-flex;
+  gap: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dark .ios-segmented-control {
+  background: rgba(44, 44, 46, 0.75);
+  backdrop-filter: blur(12px);
+}
+
+.ios-segmented-tab {
+  padding: 6px 14px;
+  border-radius: 11px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ios-label-secondary);
+  transition: all 0.22s var(--ios-spring-snappy);
+}
+
+.ios-segmented-tab.active {
+  background: #ffffff;
+  color: #000000;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.dark .ios-segmented-tab.active {
+  background: #1c1c1e;
+  color: #ffffff;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+/* ==========================================================================
+   NATIVE iOS SHEET & MODAL SYSTEM
+   ========================================================================== */
+
+.ios-sheet-container {
+  backdrop-filter: blur(32px) saturate(190%);
+  -webkit-backdrop-filter: blur(32px) saturate(190%);
+}
+
+.ios-sheet-handle {
+  width: 36px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(120, 120, 128, 0.32);
+  margin: 8px auto 14px auto;
+  transition: background-color 0.2s ease;
+}
+
+.ios-sheet-handle:hover {
+  background: rgba(120, 120, 128, 0.55);
+}
+
+/* ==========================================================================
+   ANIMATIONS & MICRO-INTERACTIONS
+   ========================================================================== */
+
+@keyframes iosGlowPulse {
+  0%, 100% {
+    box-shadow: 0 0 12px -2px rgba(10, 132, 255, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 24px 2px rgba(10, 132, 255, 0.75);
+  }
+}
+
+.ios-glow-pulse {
+  animation: iosGlowPulse 3s ease-in-out infinite;
+}
+
+@keyframes floatCloud {
+  0% { transform: translateX(100px); opacity: 0; }
+  15% { opacity: 0.35; }
+  85% { opacity: 0.35; }
+  100% { transform: translateX(-200px); opacity: 0; }
+}
+
+@keyframes tramGlideMinimal {
+  0% { transform: translateX(-110%); opacity: 0.85; }
+  48% { transform: translateX(45%); opacity: 1; }
+  52% { transform: translateX(55%); opacity: 1; }
+  100% { transform: translateX(230%); opacity: 0.85; }
+}
+
+.wotd-tram-minimal {
+  animation: tramGlideMinimal 12s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform;
+}
+
+@keyframes ponteTramCross {
+  0% { transform: translateX(-120px); opacity: 0.9; }
+  45% { transform: translateX(180px); opacity: 1; }
+  55% { transform: translateX(240px); opacity: 1; }
+  100% { transform: translateX(580px); opacity: 0.9; }
+}
+
+.ponte-tram-anim {
+  animation: ponteTramCross 14s cubic-bezier(0.35, 0, 0.25, 1) infinite;
+  will-change: transform;
+}
+
+@keyframes tagusWaterWave {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-18px); }
+}
+
+.wotd-water-anim {
+  animation: tagusWaterWave 7s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(15px) scale(0.7); opacity: 0; }
+  40% { opacity: 0.8; }
+  80% { opacity: 0.6; }
+  100% { transform: translateY(-45px) scale(1.1); opacity: 0; }
+}
+
+@keyframes pulseHeart {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+@keyframes loveShimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.love-gradient-animated {
+  background-size: 200% 200%;
+  animation: loveShimmer 6s ease infinite;
+}
+
+@keyframes sailboatGlide {
+  0% { transform: translateX(-50px) translateY(0px) rotate(0deg); }
+  50% { transform: translateX(250px) translateY(-3px) rotate(1.5deg); }
+  100% { transform: translateX(550px) translateY(0px) rotate(0deg); }
+}
+
+@keyframes seagullFly {
+  0% { transform: translate(-30px, 15px) scale(0.85); }
+  50% { transform: translate(260px, 0px) scale(1); }
+  100% { transform: translate(560px, 20px) scale(0.9); }
+}
+
+@keyframes flagRipple {
+  0%, 100% { transform: skewY(0deg) scaleX(1); }
+  50% { transform: skewY(-6deg) scaleX(0.92); }
+}
+
+.portugal-sailboat-anim {
+  animation: sailboatGlide 24s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform;
+}
+
+.portugal-seagull-anim {
+  animation: seagullFly 18s linear infinite;
+  will-change: transform;
+}
+
+.portugal-flag-ripple {
+  animation: flagRipple 3s ease-in-out infinite;
+  transform-origin: left center;
+}
+
+.wotd-cloud-anim {
+  animation: floatCloud 22s linear infinite;
+}
+
+.ldr-heart-anim {
+  animation: floatUp 3.5s ease-in-out infinite;
+}
+
+.ldr-pulse-heart {
+  animation: pulseHeart 2s ease-in-out infinite;
+}
+
+@keyframes learnPulse {
+  0% { transform: scale(0.96); box-shadow: 0 0 0 0 rgba(10, 132, 255, 0.45); border-color: #0a84ff; }
+  70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(10, 132, 255, 0); border-color: #0a84ff; }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(10, 132, 255, 0); border-color: rgba(255,255,255,0.08); }
+}
+
+.learning-pulse {
+  animation: learnPulse 0.6s var(--ios-spring-snappy) forwards;
+  background: rgba(10, 132, 255, 0.08) !important;
+}
+
+/* Audio Wave Visualizer Animations */
+@keyframes audioWave1 {
+  0%, 100% { height: 25%; transform: scaleY(0.4); }
+  50% { height: 100%; transform: scaleY(1); }
+}
+
+@keyframes audioWave2 {
+  0%, 100% { height: 75%; transform: scaleY(0.7); }
+  50% { height: 30%; transform: scaleY(0.35); }
+}
+
+@keyframes audioWave3 {
+  0%, 100% { height: 35%; transform: scaleY(0.45); }
+  50% { height: 95%; transform: scaleY(1); }
+}
+
+@keyframes audioWave4 {
+  0%, 100% { height: 85%; transform: scaleY(0.8); }
+  50% { height: 20%; transform: scaleY(0.25); }
+}
+
+@keyframes audioWave5 {
+  0%, 100% { height: 40%; transform: scaleY(0.5); }
+  50% { height: 100%; transform: scaleY(1); }
+}
+
+@keyframes audioPulseRing {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.18); opacity: 0.3; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+.audio-bar-1 { animation: audioWave1 0.65s ease-in-out infinite alternate; }
+.audio-bar-2 { animation: audioWave2 0.5s ease-in-out infinite alternate; }
+.audio-bar-3 { animation: audioWave3 0.8s ease-in-out infinite alternate; }
+.audio-bar-4 { animation: audioWave4 0.58s ease-in-out infinite alternate; }
+.audio-bar-5 { animation: audioWave5 0.72s ease-in-out infinite alternate; }
+.audio-pulse-ring { animation: audioPulseRing 1.4s ease-out infinite; }
 
 model-viewer::part(default-progress-bar) {
   display: none;
+}
+
+/* ==========================================================================
+   NATIVE iOS MODAL ANIMATIONS
+   ========================================================================== */
+
+@keyframes iosModalScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes iosModalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes iosFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.ios-modal-scale-in {
+  animation: iosModalScaleIn 0.4s var(--ios-spring-snappy) forwards;
+  will-change: transform, opacity;
+}
+
+.ios-modal-slide-up {
+  animation: iosModalSlideUp 0.5s var(--ios-spring-bouncy) forwards;
+  will-change: transform, opacity;
+}
+
+.ios-fade-in {
+  animation: iosFadeIn 0.3s ease-out forwards;
 }

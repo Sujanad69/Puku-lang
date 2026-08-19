@@ -2,6 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { triggerHaptic } from '../utils/haptics';
 import { VocabWord } from '../types';
 import { speakPt, playSuccessSound, playErrorSound, playTone } from '../utils/audio';
+import { 
+  X, 
+  Volume2, 
+  Sparkles, 
+  Mic, 
+  CheckCircle2, 
+  XCircle, 
+  ChevronRight, 
+  HelpCircle, 
+  Heart,
+  Keyboard,
+  Layers
+} from 'lucide-react';
 
 interface QuizModalProps {
   quizPool: VocabWord[];
@@ -30,7 +43,6 @@ export const QuizModal: React.FC<QuizModalProps> = ({
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
-  const [isListeningMode, setIsListeningMode] = useState(false);
   const [earnedXP, setEarnedXP] = useState(0);
   const [typedAnswer, setTypedAnswer] = useState('');
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -40,11 +52,15 @@ export const QuizModal: React.FC<QuizModalProps> = ({
   const currentWord = quizPool[currentIndex] || quizPool[0];
   const progressPercent = ((currentIndex + 1) / quizPool.length) * 100;
 
-  // Generate 4 multiple choice options
+  // Sentence blocks
   const [sentenceBlocks, setSentenceBlocks] = useState<{word: string, id: number}[]>([]);
   const [selectedBlocks, setSelectedBlocks] = useState<{word: string, id: number}[]>([]);
 
-  const [mcqOptions] = useState<string[]>(() => {
+  // MCQ Options for current question
+  const [mcqOptions, setMcqOptions] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!currentWord) return;
     const opts = [currentWord.pt];
     const poolCopy = [...quizPool].filter(w => w.pt !== currentWord.pt);
     while (opts.length < 4 && poolCopy.length > 0) {
@@ -52,10 +68,9 @@ export const QuizModal: React.FC<QuizModalProps> = ({
       opts.push(poolCopy[randIdx].pt);
       poolCopy.splice(randIdx, 1);
     }
-    return opts.sort(() => 0.5 - Math.random());
-  });
+    setMcqOptions(opts.sort(() => 0.5 - Math.random()));
+  }, [currentIndex, currentWord, quizPool]);
 
-  
   const [questionModes, setQuestionModes] = useState<('mcq' | 'type' | 'voice' | 'sentence')[]>([]);
   const [isListening, setIsListening] = useState(false);
   const [voiceResult, setVoiceResult] = useState('');
@@ -63,8 +78,7 @@ export const QuizModal: React.FC<QuizModalProps> = ({
   useEffect(() => {
     if (quizPool[currentIndex]) {
       const words = quizPool[currentIndex].pt.split(' ');
-      // Add some random words
-      let distractors = ['a', 'o', 'que', 'muito'];
+      let distractors = ['a', 'o', 'que', 'muito', 'de'];
       const allWords = [...words, ...distractors.slice(0, 2)].map((w, i) => ({word: w, id: i})).sort(() => Math.random() - 0.5);
       setSentenceBlocks(allWords);
       setSelectedBlocks([]);
@@ -85,8 +99,6 @@ export const QuizModal: React.FC<QuizModalProps> = ({
 
   const handleVoiceRecord = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      console.log("Voice learning is not supported in this browser. Please use Chrome or Safari.");
-      // Fallback
       setQuestionModes(prev => prev.map((m, i) => i === currentIndex ? 'mcq' : m));
       return;
     }
@@ -94,11 +106,11 @@ export const QuizModal: React.FC<QuizModalProps> = ({
     setIsListening(true);
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
-    recognition.lang = 'pt-PT'; // European Portuguese
+    recognition.lang = 'pt-PT';
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
     
-    recognition.onresult = (event) => {
+    recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
       setVoiceResult(transcript);
       setIsListening(false);
@@ -106,15 +118,12 @@ export const QuizModal: React.FC<QuizModalProps> = ({
       const normalizedSpoken = transcript.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, '');
       const normalizedTarget = currentWord.pt.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, '');
       
-      // Simple string matching (in a real app you might use Levenshtein distance)
       const isMatch = normalizedSpoken === normalizedTarget || normalizedSpoken.includes(normalizedTarget);
       checkAnswer(isMatch);
     };
     
-    recognition.onerror = (e) => {
+    recognition.onerror = () => {
       setIsListening(false);
-      console.log("Speech recognition error", e.error);
-      console.log("Could not hear you clearly. Please try again.");
     };
     
     recognition.onend = () => {
@@ -123,7 +132,6 @@ export const QuizModal: React.FC<QuizModalProps> = ({
     
     recognition.start();
   };
-
 
   const handleSelectOption = (opt: string) => {
     if (isAnswered) return;
@@ -147,20 +155,7 @@ export const QuizModal: React.FC<QuizModalProps> = ({
     if (isAnswered) return;
     const answer = selectedBlocks.map(b => b.word).join(' ');
     const isCorrectAnswer = answer.toLowerCase().replace(/[^a-z0-9áéíóúãõç]/g, '') === currentWord.pt.toLowerCase().replace(/[^a-z0-9áéíóúãõç]/g, '');
-    setIsAnswered(true);
-    setIsCorrect(isCorrectAnswer);
-    if (isCorrectAnswer) {
-      setScore(s => s + 1);
-      setEarnedXP(xp => xp + 15);
-      playSuccessSound();
-      triggerHaptic('success');
-      window.dispatchEvent(new CustomEvent('show-toast', { detail: { title: 'Perfect!', message: '+15 XP earned', icon: '🌟' }}));
-    } else {
-      onLoseHeart();
-      onAddWeakWord(currentWord);
-      playErrorSound();
-      triggerHaptic('error');
-    }
+    checkAnswer(isCorrectAnswer);
   };
 
   const handleTypeSubmit = (e: React.FormEvent) => {
@@ -188,7 +183,7 @@ export const QuizModal: React.FC<QuizModalProps> = ({
       window.dispatchEvent(new CustomEvent('puku:correct_answer'));
 
       let xpPerCorrect = isWeakWordsMode ? 20 : 10;
-      if (isLoveUnit) xpPerCorrect *= 2; // 2x Bonus for Love Language!
+      if (isLoveUnit) xpPerCorrect *= 2;
 
       setEarnedXP(prev => prev + xpPerCorrect);
       onRemoveWeakWord(currentWord.pt);
@@ -205,12 +200,14 @@ export const QuizModal: React.FC<QuizModalProps> = ({
 
   const handleNext = () => {
     if (currentIndex + 1 < quizPool.length) {
+      playTone(560, 'sine', 0.04);
+      triggerHaptic('light');
       setCurrentIndex(prev => prev + 1);
       setIsAnswered(false);
       setSelectedOption(null);
       setTypedAnswer('');
+      setVoiceResult('');
     } else {
-      // Quiz Finished!
       const totalCoins = earnedXP;
       const isPerfect = score + (isCorrect ? 1 : 0) === quizPool.length;
       
@@ -233,159 +230,235 @@ export const QuizModal: React.FC<QuizModalProps> = ({
     setTypedAnswer(prev => prev + char);
   };
 
+  // Header Gradient selection
+  const headerGradient = isLoveUnit
+    ? 'from-[#e11d48] via-[#f43f5e] to-[#fb7185]'
+    : isWeakWordsMode
+    ? 'from-[#e11d48] via-[#ea580c] to-[#f97316]'
+    : 'from-[#1d4ed8] via-[#2563eb] to-[#3b82f6]';
+
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[#FAFAF5] overflow-hidden animate-in fade-in duration-200">
-      {/* Top Header */}
-      <div className="flex items-center justify-between  border-gray-100 bg-white px-4 py-3 shadow-sm pt-safe">
-        <button
-          onClick={onClose}
-          className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gray-100 text-gray-500 border-b-2 border-gray-200 active:translate-y-0.5"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-        </button>
-
-        <div className="flex-1 mx-4">
-          <div className="h-3.5 w-full overflow-hidden rounded-full bg-gray-200">
-            <div
-              className="h-full bg-[#2563eb] rounded-full transition-all duration-300"
-              style={{ width: `${progressPercent}%` }}
-            />
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-xl ios-fade-in">
+      
+      <div className="relative w-full max-w-2xl overflow-hidden rounded-[36px] bg-white dark:bg-[#12141a] border border-slate-200/60 dark:border-slate-800/80 shadow-2xl flex flex-col max-h-[92vh] ios-modal-scale-in">
+        
+        {/* ================= HEADER BANNER ================= */}
+        <div className={`relative bg-gradient-to-br ${headerGradient} p-6 text-white text-center overflow-hidden shrink-0`}>
+          
+          {/* Ambient Glows */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden select-none opacity-20">
+            <div className="absolute -top-10 -right-10 w-44 h-44 bg-white rounded-full blur-2xl"></div>
+            <div className="absolute -bottom-10 -left-10 w-44 h-44 bg-white rounded-full blur-2xl"></div>
           </div>
+
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 h-9 w-9 rounded-full bg-black/20 hover:bg-black/30 flex items-center justify-center text-white transition-colors cursor-pointer backdrop-blur-md"
+            title="Close Quiz"
+          >
+            <X className="w-5 h-5" />
+          </button>
+
+          {/* Pill Badge */}
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3.5 py-1 text-[11px] font-extrabold uppercase tracking-wider backdrop-blur-md border border-white/20 mb-2 shadow-xs">
+            {isLoveUnit ? (
+              <>
+                <Heart className="w-3.5 h-3.5 text-rose-200 fill-current" />
+                <span>Love Phrases Quiz • Sujan & Amisha</span>
+              </>
+            ) : isWeakWordsMode ? (
+              <>
+                <HelpCircle className="w-3.5 h-3.5 text-amber-200" />
+                <span>Weak Words Master Review</span>
+              </>
+            ) : (
+              <>
+                <Layers className="w-3.5 h-3.5 text-blue-200" />
+                <span>Unit Quiz • {unitTitle}</span>
+              </>
+            )}
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
+            {isLoveUnit ? 'Romantic Quiz ❤️' : isWeakWordsMode ? 'Weak Words Workout ⚡' : `${unitTitle} Quiz`}
+          </h2>
+
+          <p className="text-xs sm:text-sm text-white/90 font-medium mt-1 max-w-md mx-auto leading-relaxed">
+            Question {currentIndex + 1} of {quizPool.length} • Score: {score}
+          </p>
+
+          {/* Progress Indicator */}
+          <div className="mt-4 max-w-xs mx-auto">
+            <div className="flex items-center justify-between text-[11px] font-bold text-white/90 mb-1 px-1">
+              <span>Progress</span>
+              <span>{Math.round(progressPercent)}%</span>
+            </div>
+            <div className="h-2 w-full bg-black/25 rounded-full overflow-hidden p-0.5">
+              <div 
+                className="h-full bg-amber-300 rounded-full transition-all duration-300 shadow-sm"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          </div>
+
         </div>
 
-        <div className="flex items-center gap-1 text-xs font-bold text-[#2563eb]">
-          <span>{currentIndex + 1}</span>
-          <span>/</span>
-          <span>{quizPool.length}</span>
-        </div>
-      </div>
-
-      {/* Main Quiz Area */}
-      <div className="flex-1 overflow-y-auto p-4 flex flex-col justify-between max-w-md mx-auto w-full">
-        <div className="pt-4 space-y-6">
-          {/* Question Box */}
-          <div className="text-center space-y-2">
-            <span className="inline-flex items-center gap-1 rounded-2xl bg-[#E5F3FF] border border-[#B3E5FC] px-3 py-1 text-xs font-bold text-[#1899D6] uppercase tracking-wider">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.36-7.36l-.71.71M6.34 17.66l-.71.71m12.02 0l.71.71M6.34 6.34l.71.71M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/></svg>
+        {/* ================= QUIZ CONTENT BODY ================= */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+          
+          {/* Question Card */}
+          <div className="rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-[#181a22] p-6 text-center space-y-3 shadow-xs">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 px-3 py-1 text-xs font-bold uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5" />
               <span>Translate into European Portuguese</span>
             </span>
 
-            <h2 className="text-3xl font-bold text-[#4B4B4B] leading-tight">
+            <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-snug">
               "{currentWord.en}"
-            </h2>
+            </h3>
+
+            {currentWord.nepali && (
+              <p className="text-xs font-bold text-rose-500">
+                🇳🇵 {currentWord.nepali}
+              </p>
+            )}
 
             <button
               onClick={() => speakPt(currentWord.pt)}
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#2563eb] hover:underline"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer pt-1"
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+              <Volume2 className="w-4 h-4" />
               <span>Listen to Portuguese audio</span>
             </button>
           </div>
 
-          {/* Interactive Input based on Question Type */}
+          {/* Interactive Modes */}
           {questionMode === 'mcq' ? (
-            <div className="space-y-3 pt-2">
-              {mcqOptions.map((option, idx) => {
-                let btnStyle = 'border border-gray-100  bg-white text-[#4B4B4B] hover:border-[#1CB0F6] active:border-b-2 active:translate-y-0.5';
+            <div className="space-y-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-1">
+                Choose the correct option:
+              </span>
 
-                if (isAnswered) {
-                  if (option === currentWord.pt) {
-                    btnStyle = 'border border-[#2563eb]  bg-[#E8F5E9] text-[#2E7D32]';
-                  } else if (option === selectedOption) {
-                    btnStyle = 'border border-[#FF4B4B]  bg-[#FFEBEB] text-[#C62828]';
-                  } else {
-                    btnStyle = 'opacity-40 border border-gray-100 bg-gray-50 text-gray-400';
+              <div className="grid grid-cols-1 gap-2">
+                {mcqOptions.map((opt, idx) => {
+                  let btnStyle = 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 hover:border-blue-400';
+
+                  if (isAnswered) {
+                    if (opt === currentWord.pt) {
+                      btnStyle = 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-900 dark:text-emerald-100 font-black';
+                    } else if (opt === selectedOption) {
+                      btnStyle = 'bg-rose-50 dark:bg-rose-950/40 border-rose-500 text-rose-900 dark:text-rose-100';
+                    } else {
+                      btnStyle = 'opacity-40 bg-slate-100 dark:bg-slate-800 border-transparent';
+                    }
                   }
-                }
 
-                return (
-                  <button
-                    key={idx}
-                    onClick={() => handleSelectOption(option)}
-                    disabled={isAnswered}
-                    className={`w-full rounded-2xl p-4 text-left font-bold text-base transition-all ${btnStyle}`}
-                  >
-                    {option}
-                  </button>
-                );
-              })}
-            </div>
-
-          
-          ) : questionMode === 'sentence' ? (
-            <div className="space-y-6 pt-2">
-              <div className="min-h-[80px] p-4 rounded-2xl bg-gray-50 border-2 border-dashed border-gray-300 flex flex-wrap gap-2 items-start">
-                {selectedBlocks.map(block => (
-                  <button
-                    key={block.id}
-                    onClick={() => handleBlockClick(block, true)}
-                    disabled={isAnswered}
-                    className="px-4 py-2 bg-white border-2 border-gray-200 rounded-xl font-bold text-[#4B4B4B] shadow-sm hover:border-[#1CB0F6] active:translate-y-0.5"
-                  >
-                    {block.word}
-                  </button>
-                ))}
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => handleSelectOption(opt)}
+                      disabled={isAnswered}
+                      className={`p-4 rounded-2xl border font-black text-base transition-all cursor-pointer flex items-center justify-between shadow-xs ${btnStyle}`}
+                    >
+                      <span>{opt}</span>
+                      {isAnswered && opt === currentWord.pt && (
+                        <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                      )}
+                      {isAnswered && opt === selectedOption && opt !== currentWord.pt && (
+                        <XCircle className="w-5 h-5 text-rose-500" />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
+            </div>
+          ) : questionMode === 'sentence' ? (
+            <div className="space-y-4">
+              <div className="min-h-[85px] p-4 rounded-3xl bg-slate-100 dark:bg-slate-900 border-2 border-dashed border-slate-300 dark:border-slate-700 flex flex-wrap gap-2 items-center justify-center">
+                {selectedBlocks.length === 0 ? (
+                  <span className="text-xs font-semibold text-slate-400">
+                    Tap word tiles below to construct the sentence
+                  </span>
+                ) : (
+                  selectedBlocks.map(block => (
+                    <button
+                      key={block.id}
+                      onClick={() => handleBlockClick(block, true)}
+                      disabled={isAnswered}
+                      className="px-4 py-2.5 bg-blue-600 text-white rounded-xl font-black text-sm shadow-sm cursor-pointer active:scale-95"
+                    >
+                      {block.word}
+                    </button>
+                  ))
+                )}
+              </div>
+
               <div className="flex flex-wrap gap-2 justify-center">
                 {sentenceBlocks.map(block => (
                   <button
                     key={block.id}
                     onClick={() => handleBlockClick(block, false)}
                     disabled={isAnswered}
-                    className="px-4 py-2 bg-white border-2 border-gray-200 border-b-4 rounded-xl font-bold text-[#4B4B4B] hover:bg-gray-50 active:translate-y-1 active:border-b-2 transition-all"
+                    className="px-4 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-slate-200 hover:border-blue-400 active:scale-95 cursor-pointer shadow-xs"
                   >
                     {block.word}
                   </button>
                 ))}
               </div>
+
               {!isAnswered && (
                 <button
                   onClick={handleSentenceSubmit}
                   disabled={selectedBlocks.length === 0}
-                  className="btn-vibrant-green w-full py-4 font-bold text-white text-base shadow-lg disabled:opacity-50"
+                  className="w-full py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 font-bold text-xs text-white transition-all shadow-md active:scale-98 disabled:opacity-40 cursor-pointer"
                 >
-                  Check
+                  Check Sentence
                 </button>
               )}
             </div>
           ) : questionMode === 'voice' ? (
-            <div className="space-y-4 pt-2 text-center">
-              <p className="text-sm font-semibold text-gray-500 mb-2">Speak the Portuguese translation:</p>
+            <div className="space-y-4 text-center py-2">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                Speak Portuguese phrase into your microphone:
+              </p>
+
               <button
                 onClick={handleVoiceRecord}
                 disabled={isAnswered || isListening}
-                className={`mx-auto flex h-24 w-24 items-center justify-center rounded-full shadow-lg transition-transform ${
-                  isListening ? 'bg-rose-500 scale-110 animate-pulse text-white' : 'bg-blue-600 text-white hover:scale-105'
+                className={`mx-auto h-20 w-20 rounded-full flex items-center justify-center shadow-lg transition-all cursor-pointer ${
+                  isListening
+                    ? 'bg-rose-500 scale-110 animate-pulse text-white ring-8 ring-rose-500/30'
+                    : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:scale-105'
                 }`}
               >
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
-                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                  <line x1="12" y1="19" x2="12" y2="22"/>
-                </svg>
+                <Mic className="w-8 h-8" />
               </button>
-              {isListening && <p className="text-rose-500 font-bold animate-pulse mt-4">Listening...</p>}
-              {isAnswered && (
-                <div className="mt-4 p-3 bg-gray-100 rounded-xl">
-                  <p className="text-xs text-gray-500 font-semibold uppercase">You said:</p>
-                  <p className="text-lg font-bold text-gray-800">"{voiceResult}"</p>
+
+              {isListening && (
+                <p className="text-xs font-bold text-rose-500 animate-pulse">
+                  Listening to Lisbon Portuguese... Speak clearly now!
+                </p>
+              )}
+
+              {voiceResult && (
+                <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-2xl max-w-xs mx-auto">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase">You said:</p>
+                  <p className="text-sm font-bold text-slate-800 dark:text-white">"{voiceResult}"</p>
                 </div>
               )}
             </div>
           ) : (
-            <form onSubmit={handleTypeSubmit}
- className="space-y-4 pt-2">
+            <form onSubmit={handleTypeSubmit} className="space-y-3">
               <input
                 type="text"
                 value={typedAnswer}
                 onChange={e => setTypedAnswer(e.target.value)}
                 disabled={isAnswered}
-                placeholder="Type Portuguese phrase..."
-                className="w-full rounded-2xl border border-gray-200  bg-white p-4 text-center text-xl font-bold text-[#4B4B4B] outline-none focus:border-[#2563eb] disabled:bg-gray-100"
+                placeholder="Type European Portuguese translation..."
+                className="w-full rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 text-center text-lg font-black text-slate-900 dark:text-white outline-none focus:border-blue-500"
               />
 
-              {/* Accent Keys Helper */}
               {!isAnswered && (
                 <div className="flex flex-wrap justify-center gap-1.5">
                   {['á', 'é', 'í', 'ó', 'ú', 'ã', 'õ', 'ç'].map(char => (
@@ -393,7 +466,7 @@ export const QuizModal: React.FC<QuizModalProps> = ({
                       key={char}
                       type="button"
                       onClick={() => addAccentChar(char)}
-                      className="h-10 w-10 rounded-2xl border border-gray-100 border-b-2 border-b-gray-300 bg-white font-bold text-[#4B4B4B] active:border-b-0 active:translate-y-0.5"
+                      className="h-9 w-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold text-sm text-slate-800 dark:text-slate-200 active:scale-90 cursor-pointer"
                     >
                       {char}
                     </button>
@@ -405,57 +478,75 @@ export const QuizModal: React.FC<QuizModalProps> = ({
                 <button
                   type="submit"
                   disabled={!typedAnswer.trim()}
-                  className="btn-vibrant-green w-full py-4 font-bold text-white text-base shadow-lg disabled:opacity-50"
+                  className="w-full py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 font-bold text-xs text-white transition-all shadow-md active:scale-98 disabled:opacity-40 cursor-pointer"
                 >
-                  Submit Answer
+                  Submit Translation
                 </button>
               )}
             </form>
           )}
-        </div>
 
-        {/* Feedback Sheet upon Answering */}
-        {isAnswered && (
-          <div
-            className={`mt-6 rounded-2xl p-5 border border-b shadow-xl animate-in slide-in-from-bottom-6 duration-300 ${
-              isCorrect
-                ? 'bg-[#E8F5E9] border-[#2563eb] border-b-[#1d4ed8] text-[#1B5E20]'
-                : 'bg-[#FFEBEB] border-[#FF4B4B] border-b-[#D33131] text-[#B71C1C]'
-            }`}
-          >
-            <div className="flex items-start gap-3">
-              {isCorrect ? (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
-              ) : (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
-              )}
-
-              <div className="flex-1">
-                <h4 className="text-lg font-bold">
-                  {isCorrect ? 'Excelente! Correct!' : 'Acho que falhaste!'}
-                </h4>
-                <p className="mt-1 text-sm font-bold">
-                  Correct Portuguese: <span className="underline">{currentWord.pt}</span>
-                </p>
-                {currentWord.phonetic && (
-                  <p className="text-xs font-bold text-gray-600">
-                    Pronunciation: [{currentWord.phonetic}]
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <button
-              onClick={handleNext}
-              className={`mt-4 w-full py-3.5 text-base ${
-                isCorrect ? 'btn-vibrant-green' : 'btn-vibrant-red'
+          {/* Feedback Sheet upon Answering */}
+          {isAnswered && (
+            <div
+              className={`rounded-3xl p-5 border shadow-lg space-y-3 ios-modal-slide-up ${
+                isCorrect
+                  ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-100'
+                  : 'bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800 text-rose-900 dark:text-rose-100'
               }`}
             >
-              Continue Next →
-            </button>
-          </div>
-        )}
+              <div className="flex items-start gap-3">
+                {isCorrect ? (
+                  <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0 mt-0.5" />
+                ) : (
+                  <XCircle className="w-6 h-6 text-rose-600 shrink-0 mt-0.5" />
+                )}
+
+                <div className="space-y-1 flex-1">
+                  <h4 className="text-base font-black">
+                    {isCorrect ? 'Excelente! Correct!' : 'Acho que falhaste!'}
+                  </h4>
+                  <p className="text-xs font-bold">
+                    Correct Portuguese: <span className="underline">{currentWord.pt}</span>
+                  </p>
+                  {currentWord.phonetic && (
+                    <p className="text-[11px] opacity-80">
+                      Pronunciation: /{currentWord.phonetic}/
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <button
+                onClick={handleNext}
+                className={`w-full py-3.5 rounded-2xl font-bold text-xs text-white shadow-md active:scale-98 transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                  isCorrect ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-rose-600 hover:bg-rose-700'
+                }`}
+              >
+                <span>{currentIndex + 1 < quizPool.length ? 'Next Question' : 'View Quiz Results'}</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
+        </div>
+
+        {/* ================= FOOTER ================= */}
+        <div className="p-4 sm:p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-[#0e1015] shrink-0 flex items-center justify-between gap-3">
+          <span className="text-xs text-slate-400 font-semibold">
+            {quizPool.length - currentIndex} questions remaining
+          </span>
+
+          <button
+            onClick={onClose}
+            className="py-2.5 px-4 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-slate-700 dark:text-slate-200 font-bold text-xs cursor-pointer"
+          >
+            Quit Quiz
+          </button>
+        </div>
+
       </div>
+
     </div>
   );
 };

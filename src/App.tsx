@@ -14,6 +14,7 @@ import {
 } from './utils/storage';
 import { UNITS_DATA, ALL_WORDS_FLAT } from './data/portugueseData';
 import { playSuccessSound, playTone, speakPt } from './utils/audio';
+import { calculateSRSUpdate, getSRSStats, seedInitialSRSRecords } from './utils/srsEngine';
 
 import { MascotIsland } from './components/MascotIsland';
 import { WordOfTheDayCard } from './components/WordOfTheDayCard';
@@ -30,11 +31,35 @@ import { FloatingGlassTabBar } from './components/FloatingGlassTabBar';
 import { ConfettiEffect } from './components/ConfettiEffect';
 import { PukuCompanion } from './components/PukuCompanion';
 import { OnboardingModal } from './components/OnboardingModal';
+import { AuthModal } from './components/AuthModal';
+import { LovePhrasesModal } from './components/LovePhrasesModal';
 import { FlashcardModal } from './components/FlashcardModal';
 import { StoryModeModal } from './components/StoryModeModal';
+import { SurvivalSimulatorModal } from './components/SurvivalSimulatorModal';
+import { NepaliBridgeModal } from './components/NepaliBridgeModal';
+import { PortugalJourneyMapModal } from './components/PortugalJourneyMapModal';
+import { EuroCashierModal } from './components/EuroCashierModal';
+import { DailyQuestsModal } from './components/DailyQuestsModal';
+import { ArcadeHubSection } from './components/ArcadeHubSection';
+import { LisboaHeroBanner } from './components/LisboaHeroBanner';
+import { LisboaTabNav, HomeTab } from './components/LisboaTabNav';
+import { DiscoveryCarousel } from './components/DiscoveryCarousel';
+import { getDailyQuests } from './utils/quests';
+import { PlaneIcon, WaveformIcon, ChevronRightIcon } from './components/icons/AppleIcons';
+import { MapPin, Coins, Gem, Sparkles, Gift, Brain, Lock, Check } from 'lucide-react';
+import { FlagPortugal, FlagNepal, PremiumTrophy, GoldCoin } from './components/icons/PremiumIcons';
 
 export default function App() {
-  const { progress, setProgress, user, login, logout } = useFirebaseProgress();
+  const { 
+    progress, 
+    setProgress, 
+    user, 
+    loginWithGoogle,
+    loginWithEmail,
+    signupWithEmail,
+    sendPasswordReset,
+    logout 
+  } = useFirebaseProgress();
   const [showOnboarding, setShowOnboarding] = useState(!progress.hasSeenOnboarding);
   const [activeModal, setActiveModal] = useState<ActiveModal>('none');
   const [selectedUnitId, setSelectedUnitId] = useState<string>('unit1');
@@ -52,6 +77,7 @@ export default function App() {
   // Theme & Language Controls
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [lang, setLang] = useState<'pt' | 'en'>('en');
+  const [homeTab, setHomeTab] = useState<HomeTab>('path');
 
   // Quiz State
   const [quizPool, setQuizPool] = useState<VocabWord[]>([]);
@@ -152,21 +178,82 @@ export default function App() {
 
   const handleAddWeakWord = (word: VocabWord) => {
     setProgress(prev => {
-      if (prev.weakWords.some(w => w.pt === word.pt)) return prev;
-      return { ...prev, weakWords: [...prev.weakWords, word] };
+      const isAlreadyWeak = prev.weakWords.some(w => w.pt === word.pt);
+      const updatedWeak = isAlreadyWeak ? prev.weakWords : [...prev.weakWords, word];
+      
+      // Update SRS as 'again' / due
+      const currentSRS = prev.srsRecords?.[word.pt];
+      const updatedItem = calculateSRSUpdate(currentSRS, 'again', {
+        pt: word.pt,
+        en: word.en,
+        phonetic: word.phonetic,
+        nepali: word.nepali,
+      });
+
+      return {
+        ...prev,
+        weakWords: updatedWeak,
+        srsRecords: {
+          ...(prev.srsRecords || {}),
+          [word.pt]: updatedItem,
+        },
+      };
     });
   };
 
   const handleRemoveWeakWord = (wordPt: string) => {
-    setProgress(prev => ({
-      ...prev,
-      weakWords: prev.weakWords.filter(w => w.pt !== wordPt),
-    }));
+    setProgress(prev => {
+      const currentSRS = prev.srsRecords?.[wordPt];
+      const wordObj = ALL_WORDS_FLAT.find(w => w.pt === wordPt) || { pt: wordPt, en: wordPt };
+      const updatedItem = calculateSRSUpdate(currentSRS, 'good', wordObj);
+
+      return {
+        ...prev,
+        weakWords: prev.weakWords.filter(w => w.pt !== wordPt),
+        srsRecords: {
+          ...(prev.srsRecords || {}),
+          [wordPt]: updatedItem,
+        },
+      };
+    });
+  };
+
+  // Quest Progress Incrementer
+  const incrementQuestProgress = (type: 'quiz' | 'survival' | 'cashier' | 'map' | 'perfect') => {
+    const today = new Date().toISOString().split('T')[0];
+    const questMap: Record<string, string> = {
+      quiz: 'quest_quiz',
+      perfect: 'quest_perfect',
+      survival: 'quest_survival',
+      cashier: 'quest_cashier',
+      map: 'quest_map',
+    };
+    const targetQuestId = questMap[type];
+    if (!targetQuestId) return;
+
+    setProgress(prev => {
+      const quests = { ...(prev.quests || {}) };
+      const currentEntry = quests[targetQuestId] && quests[targetQuestId].date === today
+        ? quests[targetQuestId]
+        : { current: 0, isClaimed: false, date: today };
+
+      quests[targetQuestId] = {
+        ...currentEntry,
+        current: currentEntry.current + 1,
+        date: today,
+      };
+
+      return {
+        ...prev,
+        quests,
+      };
+    });
   };
 
   // Unit Complete Handler
   const handleUnitComplete = (unitId: string, earnedXP: number, earnedCoins: number) => {
     playSuccessSound();
+    incrementQuestProgress('quiz');
     setProgress(prev => ({
       ...prev,
       xp: prev.xp + earnedXP,
@@ -188,6 +275,10 @@ export default function App() {
     perfectGem: boolean
   ) => {
     playSuccessSound();
+    incrementQuestProgress('quiz');
+    if (perfectGem) {
+      incrementQuestProgress('perfect');
+    }
 
     setProgress(prev => ({
       ...prev,
@@ -201,10 +292,10 @@ export default function App() {
     if (perfectGem) {
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 5000);
-      showToast(`🏆 Perfect 100%! Earned +${earnedXP} XP, +${earnedCoins} Coins 🪙, and +1 Gem 💎!`);
-      updateSpeech('🎉', 'PERFECT SCORE! Sujan is so proud of you! You earned a Gem 💎!');
+      showToast(`Perfect 100%! Earned +${earnedXP} XP, +${earnedCoins} Coins, and +1 Gem!`);
+      updateSpeech('🎉', 'PERFECT SCORE! Sujan is so proud of you! You earned a Gem!');
     } else {
-      showToast(`✨ Quiz Complete! Score: ${score}/${total}. Earned +${earnedXP} XP & +${earnedCoins} Coins 🪙!`);
+      showToast(`Quiz Complete! Score: ${score}/${total}. Earned +${earnedXP} XP & +${earnedCoins} Coins!`);
       updateSpeech('🐵', `Great effort! You got ${score}/${total} right! Keep going!`);
     }
 
@@ -241,14 +332,85 @@ export default function App() {
     }
   };
 
+  // Economy Shop Transactions
+  const handleBuyHeartRefill = () => {
+    setProgress(prev => ({
+      ...prev,
+      hearts: 5,
+      coins: Math.max(0, prev.coins - 100),
+    }));
+  };
+
+  const handleBuyStreakFreeze = () => {
+    setProgress(prev => ({
+      ...prev,
+      gems: Math.max(0, prev.gems - 2),
+      streakFrozen: true,
+      streakFreezeCount: (prev.streakFreezeCount || 0) + 1,
+    }));
+  };
+
+  const handleConvertCoinsToGem = () => {
+    setProgress(prev => ({
+      ...prev,
+      coins: Math.max(0, prev.coins - 150),
+      gems: prev.gems + 1,
+    }));
+  };
+
+  // Claim Daily Quest Reward
+  const handleClaimQuest = (questId: string, xp: number, coins: number, gems: number) => {
+    const today = new Date().toISOString().split('T')[0];
+    setProgress(prev => {
+      const quests = { ...(prev.quests || {}) };
+      const currentEntry = quests[questId] || { current: 0, isClaimed: false, date: today };
+      quests[questId] = {
+        ...currentEntry,
+        isClaimed: true,
+        date: today,
+      };
+
+      return {
+        ...prev,
+        xp: prev.xp + xp,
+        todayXP: prev.todayXP + xp,
+        coins: prev.coins + coins,
+        gems: prev.gems + gems,
+        quests,
+      };
+    });
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 3500);
+  };
+
+  const handleCompleteSurvivalScenario = (scenarioId: string, xpEarned: number, coinsEarned: number) => {
+    const isRareGem = Math.random() < 0.15; // 15% bonus gem chance
+    const gemGain = isRareGem ? 1 : 0;
+    incrementQuestProgress('survival');
+    setProgress(prev => ({
+      ...prev,
+      xp: prev.xp + xpEarned,
+      todayXP: prev.todayXP + xpEarned,
+      coins: prev.coins + coinsEarned,
+      gems: prev.gems + gemGain,
+    }));
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 4000);
+    showToast(
+      isRareGem
+        ? `Portugal Mission Mastered! +${xpEarned} XP, +${coinsEarned} Coins & +1 Gem!`
+        : `Portugal Mission Mastered! +${xpEarned} XP & +${coinsEarned} Coins!`
+    );
+  };
+
   const selectedUnit = isGlobalArcade && globalArcadeUnit ? globalArcadeUnit : (UNITS_DATA[selectedUnitId] || UNITS_DATA.unit1);
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'dark bg-black text-slate-100' : 'bg-[#f8f9fa] text-[#1c1c1e]'} font-sans pb-32 md:pb-40 transition-colors duration-300`}>
+    <div className={`min-h-screen ${theme === 'dark' ? 'dark bg-black text-white' : 'bg-transparent text-black'} pb-32 md:pb-40 transition-colors duration-300`} style={{ fontFamily: 'var(--ios-font-stack)' }}>
       {/* Top Dynamic Mascot Island Bar */}
       <MascotIsland
         user={user}
-        login={login}
+        onOpenAuth={() => setActiveModal('auth')}
         logout={logout}
         progress={progress}
         speechText={speechText}
@@ -258,6 +420,7 @@ export default function App() {
         lang={lang}
         onToggleLang={() => setLang(prev => prev === 'pt' ? 'en' : 'pt')}
         onOpenVault={() => setActiveModal('vault')}
+        onOpenQuests={() => setActiveModal('quests')}
         onGoHome={() => setActiveModal('none')}
       />
 
@@ -266,163 +429,237 @@ export default function App() {
         
         {/* Back Button bar if inside specific tool sub-modals */}
         {(activeModal !== 'none' && activeModal !== 'wardrobe' && activeModal !== 'vault') && (
-          <div className="mb-6 flex items-center justify-between bg-white dark:bg-black p-4 rounded-2xl border border-black/5 dark:border-white/10 shadow-xs">
+          <div className="mb-8 flex items-center justify-between ios-card p-4">
             <button
               onClick={() => setActiveModal('none')}
-              className="flex items-center gap-2 font-bold text-sm text-[#2563eb] hover:underline cursor-pointer"
+              className="flex items-center gap-2 font-bold text-[15px] text-[#0a84ff] hover:opacity-80 transition-opacity cursor-pointer"
             >
-              <svg width="20" height="20" className="stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
-              <span>{lang === 'pt' ? 'Voltar para Aprender' : 'Back to Learning'}</span>
+              <svg width="20" height="20" className="stroke-[3]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+              <span>{lang === 'pt' ? 'Voltar' : 'Back'}</span>
             </button>
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <span className="text-xs font-bold uppercase tracking-widest opacity-60 flex items-center gap-1.5">
               {activeModal === 'study' && (lang === 'pt' ? 'Módulo de Estudo' : 'Study Lounge')}
               {activeModal === 'quiz' && (lang === 'pt' ? 'Prática Interativa' : 'Practice Quiz')}
-              
-        {activeModal === 'story' && (
-          <StoryModeModal
-            onClose={() => setActiveModal('none')}
-            onComplete={(xp) => {
-              setProgress(prev => ({
-                ...prev,
-                xp: prev.xp + xp,
-                coins: prev.coins + xp,
-                
-              }));
-              setActiveModal('none');
-              setShowConfetti(true);
-              setTimeout(() => setShowConfetti(false), 3000);
-            }}
-          />
-        )}
-  {activeModal === 'memory' && (lang === 'pt' ? 'Jogo da Memória' : 'Memory Game')}
+              {activeModal === 'story' && (lang === 'pt' ? 'História Interativa' : 'Story Mode')}
+              {activeModal === 'memory' && (lang === 'pt' ? 'Jogo da Memória' : 'Memory Game')}
               {activeModal === 'chat' && (lang === 'pt' ? 'Tutor com IA' : 'AI Partner')}
               {activeModal === 'culture' && (lang === 'pt' ? 'Guias de Cultura' : 'Culture Guides')}
+              {activeModal === 'survival' && (
+                <span className="flex items-center gap-1.5">
+                  {lang === 'pt' ? 'Simulador de Sobrevivência' : 'Portugal Survival Lab'}
+                  <FlagPortugal size={16} />
+                </span>
+              )}
+              {activeModal === 'nepaliBridge' && (
+                <span className="flex items-center gap-1.5">
+                  {lang === 'pt' ? 'Ponte Nepalês-Português' : 'Nepali ➔ PT-PT Bridge'}
+                  <FlagNepal size={14} />
+                </span>
+              )}
             </span>
           </div>
         )}
 
         {/* TAB 1: LEARNING MATERIALS ONLY */}
         {activeModal === 'none' && (
-          <main className="space-y-6 animate-in fade-in duration-300 max-w-4xl mx-auto">
+          <main className="space-y-6 ios-fade-in max-w-4xl mx-auto">
             
-            {/* Minimal Greeting Header Banner */}
-            <div className="bg-white dark:bg-black rounded-2xl p-6 border border-black/5 dark:border-white/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-                  {getGreeting()}
-                </h1>
-                <p className="mt-1 text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400">
-                  {lang === 'pt' ? 'Português Europeu para o Sujan' : 'European Portuguese for Sujan'} • Day {progress.streak} Streak 🔥
-                </p>
+            {/* Minimal Luxury Hero Banner */}
+            <LisboaHeroBanner
+              progress={progress}
+              lang={lang}
+              onContinueNextLesson={(unitId) => handleOpenUnit(unitId)}
+              onOpenQuests={() => setActiveModal('quests')}
+            />
+
+            {/* Segmented Studio Control Tabs */}
+            <LisboaTabNav
+              activeTab={homeTab}
+              onChangeTab={(tab) => setHomeTab(tab)}
+              lang={lang}
+            />
+
+            {/* TAB CONTENT 1: LEARNING PATH & DISCOVERY */}
+            {homeTab === 'path' && (
+              <div className="space-y-6 ios-fade-in">
+                {/* Horizontal Quick Discovery Strip */}
+                <DiscoveryCarousel
+                  lang={lang}
+                  onOpenCashier={() => setActiveModal('cashier')}
+                  onOpenSurvival={() => setActiveModal('survival')}
+                  onOpenMap={() => setActiveModal('map')}
+                  onOpenBridge={() => setActiveModal('nepaliBridge')}
+                  onOpenSpeaking={() => handleStartGlobalGame('speaking')}
+                  onOpenLove={() => setActiveModal('lovePhrases')}
+                />
+
+                {/* European Portuguese Learning Modules */}
+                <UnitListCard onSelectUnit={handleOpenUnit} progress={progress} />
               </div>
+            )}
 
-              <div className="flex items-center gap-2 bg-slate-50 dark:bg-black/50 p-2 rounded-2xl border border-black/5 dark:border-white/10 self-start md:self-auto">
-                <div className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white dark:bg-black shadow-xs font-bold text-xs text-amber-500">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.59.833-6 1.83 2.122 3.654 4.542 2.667 8 .5 0 1-.5 1-1.5 1 2 0 5-2.5 5a2.5 2.5 0 0 1-2.5-2.5z"/><path d="M12 22a7.5 7.5 0 0 1-7.5-7.5c0-4.088 3.518-6.19 3.99-6.438.2-.102.443-.075.617.067.174.143.23.38.136.589-1.298 2.879-1.378 4.708-.239 6.208a3.5 3.5 0 0 0 5.012-.016c1.127-1.488 1.05-3.32-.236-6.197-.092-.206-.037-.442.134-.586.17-.144.412-.172.611-.072C14.986 8.317 19.5 10.422 19.5 14.5 19.5 18.636 16.136 22 12 22z"/></svg>
-                  <span>{progress.streak} {lang === 'pt' ? 'Dias' : 'Days'}</span>
-                </div>
-                <div className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white dark:bg-black shadow-xs font-bold text-xs text-rose-500">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-                  <span>{progress.hearts} {lang === 'pt' ? 'Corações' : 'Hearts'}</span>
-                </div>
+            {/* TAB CONTENT 2: PRACTICE ARENA & MINI-GAMES */}
+            {homeTab === 'arcade' && (
+              <div className="ios-fade-in">
+                <ArcadeHubSection
+                  progress={progress}
+                  lang={lang}
+                  onStartGlobalGame={handleStartGlobalGame}
+                  onOpenSurvival={() => setActiveModal('survival')}
+                  onOpenCashier={() => setActiveModal('cashier')}
+                  onOpenMap={() => setActiveModal('map')}
+                  onOpenBridge={() => setActiveModal('nepaliBridge')}
+                  onOpenStory={handleStartStory}
+                  onOpenLovePhrases={() => setActiveModal('lovePhrases')}
+                  onOpenQuests={() => setActiveModal('quests')}
+                />
               </div>
-            </div>
+            )}
 
-            {/* Top Featured Cards: Word of the Day & Love Language */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <WordOfTheDayCard />
-              <LoveLanguageCard onOpenLoveUnit={() => handleOpenUnit('unit7')} />
-            </div>
+            {/* TAB CONTENT 3: LOVE DIALOGUES & VOCABULARY VAULT */}
+            {homeTab === 'vault' && (
+              <div className="space-y-6 ios-fade-in">
+                {/* Love Language Card */}
+                <LoveLanguageCard onOpenLoveUnit={() => setActiveModal('lovePhrases')} />
 
-            
-            {/* Daily Quests Widget */}
-            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-[28px] p-6 shadow-lg mb-8 text-white relative overflow-hidden">
-              <div className="relative z-10 flex flex-col sm:flex-row items-center gap-6">
-                <div className="shrink-0 relative">
-                  <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/30 shadow-inner">
-                     <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" className="text-amber-300" stroke="none"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7c0 3.31 2.69 6 6 6s6-2.69 6-6V2z"/></svg>
-                  </div>
-                  <div className="absolute -bottom-2 -right-2 bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-indigo-600 shadow-sm">
-                    1/3
-                  </div>
-                </div>
-                <div className="flex-1 text-center sm:text-left">
-                  <h3 className="text-xl font-bold mb-1">Daily Quest</h3>
-                  <p className="text-indigo-100 text-sm font-semibold mb-4">Complete 3 lessons to earn a special gem!</p>
-                  <div className="w-full bg-black/20 h-3.5 rounded-full overflow-hidden">
-                    <div className="bg-amber-400 h-full w-[33%] rounded-full shadow-[0_2px_0_rgba(255,255,255,0.4)_inset]"></div>
-                  </div>
-                </div>
-                <button onClick={() => console.log("Daily Quests update at midnight!")} className="shrink-0 bg-white text-indigo-600 font-semibold px-6 py-4 rounded-2xl shadow-[0_4px_0_rgba(0,0,0,0.15)] active:translate-y-1 active:shadow-none transition-all">
-                  View Quests
-                </button>
+                {/* Interactive Daily Quests Widget */}
+                {(() => {
+                  const activeQuests = getDailyQuests(progress);
+                  const completedCount = activeQuests.filter(q => q.current >= q.target).length;
+                  const pendingClaim = activeQuests.some(q => q.current >= q.target && !q.isClaimed);
+                  const firstIncomplete = activeQuests.find(q => q.current < q.target) || activeQuests[0];
+                  const overallPercent = Math.min(100, Math.floor((completedCount / activeQuests.length) * 100));
+
+                  return (
+                    <div 
+                      onClick={() => {
+                        playTone(550, 'sine', 0.05);
+                        triggerHaptic('light');
+                        setActiveModal('quests');
+                      }}
+                      className="ios-card ios-glass p-5 sm:p-6 cursor-pointer group relative overflow-hidden"
+                    >
+                      <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5">
+                        <div className="shrink-0 relative">
+                          <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center border border-amber-500/20 text-amber-500 group-hover:scale-105 transition-transform">
+                            {pendingClaim ? <Gift className="w-6 h-6 text-emerald-500 animate-bounce" /> : <PremiumTrophy size={24} />}
+                          </div>
+                          <div className={`absolute -bottom-1 -right-1 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full border-2 border-white dark:border-slate-900 ${
+                            pendingClaim ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'
+                          }`}>
+                            {completedCount}/{activeQuests.length}
+                          </div>
+                        </div>
+
+                        <div className="flex-1 text-center sm:text-left min-w-0">
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-sm font-black text-slate-900 dark:text-white tracking-tight group-hover:text-amber-500 transition-colors">
+                                {lang === 'pt' ? 'Missões Diárias & Recompensas' : 'Daily Quests & Rewards'}
+                              </h3>
+                              {pendingClaim && (
+                                <span className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider animate-pulse">
+                                  Claim Ready!
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 text-xs font-bold text-amber-600 dark:text-amber-400">
+                              <span className="flex items-center gap-1">{progress.coins} <GoldCoin size={14} /></span>
+                              <span className="text-purple-600 dark:text-purple-400 flex items-center gap-1">{progress.gems} <Gem size={13} /></span>
+                            </div>
+                          </div>
+
+                          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-3">
+                            {firstIncomplete 
+                              ? `${lang === 'pt' ? firstIncomplete.titlePt : firstIncomplete.title} • ${firstIncomplete.current}/${firstIncomplete.target} (${firstIncomplete.description})`
+                              : 'All daily quests completed today! Tap to open Coin & Gem Vault.'}
+                          </p>
+
+                          <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full rounded-full transition-all duration-500 ${
+                                completedCount === activeQuests.length ? 'bg-emerald-500' : 'bg-amber-500'
+                              }`}
+                              style={{ width: `${overallPercent}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="shrink-0">
+                          <span className="text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                            {lang === 'pt' ? 'Ver Missões' : 'Open'} <ChevronRightIcon className="w-3.5 h-3.5" />
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Spaced Repetition (SRS) Memory Vault Widget */}
+                {(() => {
+                  const records = seedInitialSRSRecords(progress, ALL_WORDS_FLAT);
+                  const stats = getSRSStats(records);
+
+                  return (
+                    <div 
+                      onClick={() => {
+                        playTone(550, 'sine', 0.05);
+                        triggerHaptic('light');
+                        setActiveModal('vault');
+                      }}
+                      className="ios-card ios-glass p-5 sm:p-6 cursor-pointer group relative overflow-hidden bg-gradient-to-br from-indigo-500/10 to-purple-500/10"
+                    >
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="flex items-center gap-3.5">
+                          <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-400 group-hover:scale-105 transition-transform">
+                            <Brain className="w-6 h-6 text-indigo-400" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-sm font-black text-slate-900 dark:text-white">
+                                {lang === 'pt' ? 'Cofre de Repetição Espaçada (SRS)' : 'Spaced Repetition (SRS) Vault'}
+                              </h3>
+                              {stats.dueCount > 0 && (
+                                <span className="bg-rose-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider animate-pulse">
+                                  {stats.dueCount} Due
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                              {stats.dueCount > 0
+                                ? `${stats.dueCount} terms scheduled for memory retention today (${stats.averageRetention}% retention)`
+                                : `All ${stats.totalTracked} terms on schedule • ${stats.averageRetention}% Memory Health`}
+                            </p>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            playTone(550, 'sine', 0.05);
+                            triggerHaptic('medium');
+                            setActiveModal('vault');
+                          }}
+                          className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black transition-all cursor-pointer shadow-md active:scale-95 text-center shrink-0"
+                        >
+                          {stats.dueCount > 0
+                            ? (lang === 'pt' ? '⚡ Revisar Agora' : '⚡ Review Due Words')
+                            : (lang === 'pt' ? 'Abrir Cofre' : 'Open Vault')}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })()}
+
               </div>
-              <div className="absolute inset-0 opacity-10 pointer-events-none">
-                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <pattern id="stars" width="40" height="40" patternUnits="userSpaceOnUse">
-                      <path d="M20 5l3.5 10.5 11-1.5-8.5 7 3 11-9.5-6.5L10 32l3-11-8.5-7 11 1.5z" fill="white" />
-                    </pattern>
-                  </defs>
-                  <rect width="100%" height="100%" fill="url(#stars)" />
-                </svg>
-              </div>
-            </div>
-
-            
-            
-            {/* Story Mode Button */}
-            <div className="flex justify-center mb-8">
-              <button onClick={handleStartStory} className="bg-gradient-to-r from-rose-400 to-pink-500 text-white px-8 py-3 rounded-full font-black text-lg shadow-[0_8px_30px_rgba(244,63,94,0.4)] flex items-center gap-3 hover:scale-105 active:scale-95 transition-all">
-                <span className="text-2xl">📖</span> Play Romance Story
-              </button>
-            </div>
-
-            {/* European Portuguese Learning Modules */}
-            <UnitListCard onSelectUnit={handleOpenUnit} progress={progress} />
-
-{/* Mini Games / Arcade Section */}
-            <div className="bg-white dark:bg-[#18181b] rounded-[28px] p-6 border-2 border-slate-100 dark:border-white/5 shadow-sm mb-8 animate-in fade-in slide-in-from-bottom-4">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-14 h-14 bg-gradient-to-br from-[#1CB0F6] to-purple-500 text-white rounded-2xl flex items-center justify-center shadow-md">
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4"/><path d="M8 10v4"/><circle cx="15" cy="13" r="1"/><circle cx="18" cy="11" r="1"/></svg>
-                </div>
-                <div>
-                  <h2 className="text-2xl font-black text-slate-800 dark:text-white">Arcade Hub</h2>
-                  <p className="text-[15px] text-slate-500 font-medium">Earn fast XP with quick mini-games!</p>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <button onClick={() => handleStartGlobalGame('match')} className="flex flex-col items-center justify-center p-5 rounded-2xl bg-[#1CB0F6]/10 text-[#1CB0F6] hover:bg-[#1CB0F6]/20 transition-all border-2 border-[#1CB0F6]/20 active:scale-95 group">
-                  <svg className="w-10 h-10 mb-3 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
-                  <span className="font-bold text-lg">Match Pairs</span>
-                  <span className="text-xs font-semibold opacity-70 mt-1">+20 XP</span>
-                </button>
-                
-                <button onClick={() => handleStartGlobalGame('speaking')} className="flex flex-col items-center justify-center p-5 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 hover:bg-purple-500/20 transition-all border-2 border-purple-500/20 active:scale-95 group">
-                  <svg className="w-10 h-10 mb-3 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
-                  <span className="font-bold text-lg">Speak It</span>
-                  <span className="text-xs font-semibold opacity-70 mt-1">+20 XP</span>
-                </button>
-                
-                <button onClick={() => handleStartGlobalGame('builder')} className="flex flex-col items-center justify-center p-5 rounded-2xl bg-orange-500/10 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 transition-all border-2 border-orange-500/20 active:scale-95 group">
-                  <svg className="w-10 h-10 mb-3 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                  <span className="font-bold text-lg">Builder</span>
-                  <span className="text-xs font-semibold opacity-70 mt-1">+20 XP</span>
-                </button>
-              </div>
-            </div>
-
-
-            
+            )}
 
           </main>
         )}
 
         {/* TAB 2: STYLE SUJAN 3D STUDIO ONLY */}
         {activeModal === 'wardrobe' && (
-          <div className="fixed inset-0 z-50 animate-in fade-in zoom-in-95 duration-300">
+          <div className="fixed inset-0 z-50 ios-modal-scale-in">
             <Full3DWardrobe
               progress={progress}
               theme={theme}
@@ -436,10 +673,23 @@ export default function App() {
 
         {/* TAB 3: ACHIEVEMENTS & VAULT ONLY */}
         {activeModal === 'vault' && (
-          <div className="animate-in fade-in zoom-in-95 duration-300">
+          <div className="ios-modal-scale-in">
             <VaultAndStatsModal
               progress={progress}
               onClose={() => setActiveModal('none')}
+              onOpenQuests={() => setActiveModal('quests')}
+              onUpdateSRS={(updatedRecords, earnedXP = 0, earnedCoins = 0) => {
+                setProgress(prev => ({
+                  ...prev,
+                  srsRecords: updatedRecords,
+                  xp: prev.xp + earnedXP,
+                  todayXP: prev.todayXP + earnedXP,
+                  coins: prev.coins + earnedCoins,
+                }));
+                if (earnedXP > 0) {
+                  showToast(lang === 'pt' ? `🧠 Memória SRS atualizada! +${earnedXP} XP!` : `🧠 SRS Repetition Updated! +${earnedXP} XP!`);
+                }
+              }}
               onStartWeakWords={() => {
                 if (progress.weakWords.length > 0) {
                   handleStartQuiz(progress.weakWords.slice(0, 5), false, true, false);
@@ -462,11 +712,28 @@ export default function App() {
           </div>
         )}
 
+        {/* DAILY QUESTS & REWARD VAULT MODAL */}
+        {activeModal === 'quests' && (
+          <DailyQuestsModal
+            progress={progress}
+            lang={lang}
+            onClose={() => setActiveModal('none')}
+            onClaimQuest={handleClaimQuest}
+            onOpenSurvival={() => setActiveModal('survival')}
+            onOpenCashier={() => setActiveModal('cashier')}
+            onOpenMap={() => setActiveModal('map')}
+            onOpenWardrobe={() => setActiveModal('wardrobe')}
+            onBuyHeartRefill={handleBuyHeartRefill}
+            onBuyStreakFreeze={handleBuyStreakFreeze}
+            onConvertCoinsToGem={handleConvertCoinsToGem}
+          />
+        )}
+
         
         
         {/* UNIT HUB MODAL (Full Screen Glossary + Games) */}
         {showUnitHub && selectedUnit && (
-          <div className="fixed inset-0 z-[90] flex flex-col bg-[#F9FAFB] dark:bg-[#09090b] animate-in fade-in zoom-in-95 duration-300">
+          <div className="fixed inset-0 z-[90] flex flex-col bg-[#F9FAFB] dark:bg-[#09090b] ios-modal-scale-in">
             {/* Header */}
             <div className="flex items-center justify-between p-5 pt-safe border-b border-slate-200 dark:border-white/10 bg-white/70 dark:bg-black/70 backdrop-blur-xl">
               <button onClick={() => setShowUnitHub(false)} className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 hover:scale-105 active:scale-95 transition-transform">
@@ -539,9 +806,9 @@ export default function App() {
 
         {/* LESSON SELECTOR MODAL */}
         {showLessonSelector && selectedUnit && (
-          <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 backdrop-blur-sm animate-in fade-in">
+          <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 backdrop-blur-sm ios-fade-in">
             <div className="absolute inset-0" onClick={() => setShowLessonSelector(false)} />
-            <div className="relative w-full max-w-md bg-white dark:bg-[#18181b] rounded-t-[32px] p-6 pb-safe-offset-6 animate-in slide-in-from-bottom-full duration-300">
+            <div className="relative w-full max-w-md bg-white dark:bg-[#18181b] rounded-t-[32px] p-6 pb-safe-offset-6 ios-modal-slide-up">
               <div className="w-12 h-1.5 bg-slate-200 dark:bg-white/10 rounded-full mx-auto mb-6" />
               <h2 className="text-2xl font-black text-slate-800 dark:text-white mb-2">{selectedUnit.title}</h2>
               <p className="text-slate-500 dark:text-slate-400 mb-6 font-medium">Choose a lesson to practice. This lesson covers all the phrases in this chapter.</p>
@@ -571,10 +838,10 @@ export default function App() {
                       }`}
                     >
                       <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-xl ${
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-base font-bold ${
                           isLocked ? 'bg-slate-200 dark:bg-white/10 text-slate-400' : isCompleted ? 'bg-[#58cc02] text-white' : 'bg-[#1CB0F6] text-white'
                         }`}>
-                          {isCompleted ? '✓' : isLocked ? '🔒' : i + 1}
+                          {isCompleted ? <Check className="w-5 h-5 text-white" /> : isLocked ? <Lock className="w-4 h-4 text-slate-400" /> : i + 1}
                         </div>
                         <div className="text-left">
                           <h3 className={`font-bold text-lg ${isLocked ? 'text-slate-400' : isCompleted ? 'text-[#58cc02]' : 'text-slate-800 dark:text-white'}`}>Lesson {i + 1}</h3>
@@ -603,10 +870,13 @@ export default function App() {
             gameMode={gameMode}
             onClose={() => setActiveModal('none')}
             onComplete={() => {
-              const xpGain = gameMode === 'guided' ? 50 : 20;
-              const coinGain = gameMode === 'guided' ? 10 : 5;
+              const xpGain = gameMode === 'guided' ? 25 : 15;
+              const coinGain = gameMode === 'guided' ? 6 : 3;
+              const isRareGem = Math.random() < 0.08; // 8% chance to drop 1 rare gem
+              const gemGain = isRareGem ? 1 : 0;
               const newXP = progress.xp + xpGain;
               const newCoins = progress.coins + coinGain;
+              const newGems = progress.gems + gemGain;
               
               let updatedCompletedLessons = progress.completedLessons || {};
               let updatedCompletedUnits = progress.completedUnits || [];
@@ -616,7 +886,7 @@ export default function App() {
                 const nextLessonLevel = Math.max(currentLessons, selectedLessonIndex + 1);
                 updatedCompletedLessons = { ...updatedCompletedLessons, [selectedUnit.id]: nextLessonLevel };
                 
-                if (true && !updatedCompletedUnits.includes(selectedUnit.id)) {
+                if (!updatedCompletedUnits.includes(selectedUnit.id)) {
                   updatedCompletedUnits = [...updatedCompletedUnits, selectedUnit.id];
                 }
               }
@@ -626,21 +896,27 @@ export default function App() {
                 xp: newXP,
                 todayXP: prev.todayXP + xpGain,
                 coins: newCoins,
+                gems: newGems,
                 completedLessons: updatedCompletedLessons,
                 completedUnits: updatedCompletedUnits
               }));
 
               setShowConfetti(true);
               setTimeout(() => setShowConfetti(false), 5000);
-              updateSpeech('🎉', gameMode === 'guided' ? 'Lesson complete! Sujan is so proud of you! +' + xpGain + ' XP!' : 'Great practice! +' + xpGain + ' XP earned!');
+              updateSpeech('🎉', isRareGem 
+                ? `LUCKY DROP! You found a rare Gem 💎! +${xpGain} XP & +${coinGain} Coins!` 
+                : gameMode === 'guided' 
+                  ? `Lesson complete! Sujan is so proud of you! +${xpGain} XP & +${coinGain} Coins!` 
+                  : `Great practice! +${xpGain} XP & +${coinGain} Coins!`
+              );
               setActiveModal('none');
               setIsGlobalArcade(false);
               
               window.dispatchEvent(new CustomEvent('show-toast', { 
                 detail: { 
-                  title: gameMode === 'guided' ? 'Lesson Complete!' : 'Arcade Complete!', 
-                  message: '+' + xpGain + ' XP & ' + coinGain + ' Coins' + (isRareGem ? ' & 1 Gem 💎!' : ' earned'), 
-                  icon: '🎉' 
+                  title: isRareGem ? '✨ Rare Gem Found! 💎' : (gameMode === 'guided' ? 'Lesson Complete!' : 'Arcade Complete!'), 
+                  message: `+${xpGain} XP & +${coinGain} Coins 🪙` + (isRareGem ? ' & +1 Rare Gem 💎!' : ''), 
+                  icon: isRareGem ? '💎' : '🎉' 
                 }
               }));
             }}
@@ -685,23 +961,87 @@ export default function App() {
               setProgress(prev => ({
                 ...prev,
                 xp: prev.xp + xp,
-                
                 todayXP: prev.todayXP + xp,
                 coins: prev.coins + coins,
               }));
-              showToast(`🎉 Memory Match Cleared! +${xp} XP & +${coins} Coins 🪙!`);
+              showToast(`Memory Match Cleared! +${xp} XP & +${coins} Coins!`);
             }}
           />
         )}
 
         {activeModal === 'chat' && (
-          <div className="animate-in fade-in duration-300">
+          <div className="ios-fade-in">
             <AITutorChat onClose={() => setActiveModal('none')} />
           </div>
         )}
 
         {activeModal === 'culture' && (
           <CultureGuidesModal onClose={() => setActiveModal('none')} />
+        )}
+
+        {activeModal === 'lovePhrases' && (
+          <LovePhrasesModal
+            unit={UNITS_DATA.unit7}
+            onClose={() => setActiveModal('none')}
+            onStartPractice={(words) => {
+              setSelectedUnitId('unit7');
+              setSelectedLessonIndex(0);
+              setGameMode('guided');
+              setActiveModal('study');
+            }}
+            onStartQuiz={(words) => {
+              handleStartQuiz(words, true, false, false);
+            }}
+          />
+        )}
+
+        {activeModal === 'survival' && (
+          <SurvivalSimulatorModal
+            onClose={() => setActiveModal('none')}
+            onCompleteScenario={handleCompleteSurvivalScenario}
+          />
+        )}
+
+        {activeModal === 'nepaliBridge' && (
+          <NepaliBridgeModal
+            onClose={() => setActiveModal('none')}
+          />
+        )}
+
+        {activeModal === 'map' && (
+          <PortugalJourneyMapModal
+            onClose={() => setActiveModal('none')}
+            onReward={(xp, coins) => {
+              incrementQuestProgress('map');
+              setProgress(prev => ({
+                ...prev,
+                xp: prev.xp + xp,
+                todayXP: prev.todayXP + xp,
+                coins: prev.coins + coins,
+              }));
+              setShowConfetti(true);
+              setTimeout(() => setShowConfetti(false), 3500);
+              showToast(`Landmark Mastered! +${xp} XP & +${coins} Coins!`);
+            }}
+          />
+        )}
+
+        {activeModal === 'cashier' && (
+          <EuroCashierModal
+            onClose={() => setActiveModal('none')}
+            onReward={(xp, coins) => {
+              incrementQuestProgress('cashier');
+              setProgress(prev => ({
+                ...prev,
+                xp: prev.xp + xp,
+                todayXP: prev.todayXP + xp,
+                coins: prev.coins + coins,
+              }));
+              setShowConfetti(true);
+              setTimeout(() => setShowConfetti(false), 3500);
+              showToast(`Cashier Shift Complete! +${xp} XP & +${coins} Coins!`);
+            }}
+          />
         )}
 
         {/* Toast Popup */}
@@ -720,15 +1060,17 @@ export default function App() {
         <StoryModeModal
           onClose={() => setActiveModal('none')}
           onComplete={(xp) => {
+            const coinGain = 5;
             setProgress(prev => ({
               ...prev,
               xp: prev.xp + xp,
-                coins: prev.coins + xp,
-                
+              todayXP: prev.todayXP + xp,
+              coins: prev.coins + coinGain,
             }));
             setActiveModal('none');
             setShowConfetti(true);
             setTimeout(() => setShowConfetti(false), 3000);
+            showToast(`Story Completed! +${xp} XP & +${coinGain} Coins!`);
           }}
         />
       )}
@@ -736,10 +1078,32 @@ export default function App() {
       {showOnboarding && (
         <OnboardingModal 
           lang={lang} 
-          onComplete={() => {
-            setProgress(prev => ({ ...prev, hasSeenOnboarding: true }));
+          onComplete={(prefs) => {
+            setProgress(prev => ({ 
+              ...prev, 
+              hasSeenOnboarding: true,
+              dailyGoalXP: prefs?.dailyGoalXP || prev.dailyGoalXP || 50
+            }));
             setShowOnboarding(false);
+            if (prefs?.nickname) {
+              updateSpeech('🎉', `Bem-vinda, ${prefs.nickname}! Let's start Unit 1! ✨`);
+            }
           }} 
+        />
+      )}
+
+      {activeModal === 'auth' && (
+        <AuthModal
+          isOpen={activeModal === 'auth'}
+          onClose={() => setActiveModal('none')}
+          loginWithGoogle={loginWithGoogle}
+          loginWithEmail={loginWithEmail}
+          signupWithEmail={signupWithEmail}
+          sendPasswordReset={sendPasswordReset}
+          onSuccess={(msg) => {
+            showToast(msg);
+            setActiveModal('none');
+          }}
         />
       )}
       <DynamicIslandToast />

@@ -2,21 +2,27 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Unit, VocabWord } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { speakPt, playTone, playSuccessSound } from '../../utils/audio';
+import { AudioWaveVisualizer } from '../AudioWaveVisualizer';
+import { SpeakingStage } from './SpeakingStage';
+import { Volume2, Sparkles } from 'lucide-react';
 
 interface LessonEngineProps {
   unit: Unit;
   lessonIndex: number;
+  gameMode?: 'guided' | 'match' | 'speaking' | 'builder';
   onClose: () => void;
   onComplete: () => void;
 }
 
-type LessonStage = 'discover' | 'immersion' | 'match' | 'builder' | 'chat';
+type LessonStage = 'discover' | 'immersion' | 'speaking' | 'match' | 'builder' | 'chat';
 
 export const LessonEngine: React.FC<LessonEngineProps> = ({ unit, lessonIndex, gameMode = 'guided', onClose, onComplete }) => {
   const [currentStage, setCurrentStage] = useState<LessonStage>(gameMode === 'guided' ? 'discover' : (gameMode as LessonStage));
   const [progressPercent, setProgressPercent] = useState(0);
 
-  // Grab exactly 6 words for this specific lesson
+  const isLoveUnit = unit.id === 'unit7';
+
+  // Grab words for this specific lesson
   const WORDS_PER_LESSON = unit.words.length;
   const shuffledWords = useMemo(() => [...unit.words].sort(() => Math.random() - 0.5), [unit.words]);
   const lessonWords = useMemo(() => {
@@ -38,25 +44,38 @@ export const LessonEngine: React.FC<LessonEngineProps> = ({ unit, lessonIndex, g
     } else {
       setCurrentStage(nextStage);
       if (nextStage === 'immersion') setProgressPercent(20);
-      if (nextStage === 'match') setProgressPercent(40);
-      if (nextStage === 'builder') setProgressPercent(60);
-      if (nextStage === 'chat') setProgressPercent(80);
+      if (nextStage === 'speaking') setProgressPercent(40);
+      if (nextStage === 'match') setProgressPercent(60);
+      if (nextStage === 'builder') setProgressPercent(80);
+      if (nextStage === 'chat') setProgressPercent(90);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col bg-[#F9FAFB] dark:bg-[#09090b] overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+    <div className={`fixed inset-0 z-[9999] flex flex-col overflow-hidden ios-modal-scale-in ${
+      isLoveUnit 
+        ? 'bg-[#fff1f2] dark:bg-[#12060b]' 
+        : 'bg-[#F9FAFB] dark:bg-[#09090b]'
+    }`}>
       
       {/* Top Bar */}
-      <div className="flex items-center justify-between px-5 py-4 pt-safe z-20 bg-white/70 dark:bg-black/70 backdrop-blur-xl border-b border-black/5 dark:border-white/5">
-        <button onClick={onClose} className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 hover:scale-105 active:scale-95 transition-transform">
+      <div className={`flex items-center justify-between px-5 py-4 pt-safe z-20 backdrop-blur-xl border-b ${
+        isLoveUnit
+          ? 'bg-rose-500/10 border-rose-200/40 dark:border-rose-900/30'
+          : 'bg-white/70 dark:bg-black/70 border-black/5 dark:border-white/5'
+      }`}>
+        <button onClick={onClose} className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 hover:scale-105 active:scale-95 transition-transform cursor-pointer">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
 
         <div className="flex-1 mx-6">
           <div className="h-3.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-white/10 shadow-inner">
             <motion.div
-              className="h-full bg-gradient-to-r from-[#58cc02] to-[#46a302] rounded-full shadow-[inset_0_-2px_0_rgba(0,0,0,0.1)]"
+              className={`h-full rounded-full shadow-[inset_0_-2px_0_rgba(0,0,0,0.1)] ${
+                isLoveUnit
+                  ? 'bg-gradient-to-r from-[#e11d48] via-[#f43f5e] to-[#fb7185]'
+                  : 'bg-gradient-to-r from-[#58cc02] to-[#46a302]'
+              }`}
               initial={{ width: 0 }}
               animate={{ width: `${progressPercent}%` }}
               transition={{ type: 'spring', bounce: 0.2, duration: 0.8 }}
@@ -64,27 +83,34 @@ export const LessonEngine: React.FC<LessonEngineProps> = ({ unit, lessonIndex, g
           </div>
         </div>
 
-        <div className="w-10 h-10 flex items-center justify-center text-slate-400 font-bold text-sm bg-slate-100 dark:bg-white/10 rounded-full">
-          {lessonIndex + 1}
+        <div className={`w-10 h-10 flex items-center justify-center font-bold text-sm rounded-full ${
+          isLoveUnit
+            ? 'bg-rose-500/20 text-rose-600 dark:text-rose-300'
+            : 'text-slate-400 bg-slate-100 dark:bg-white/10'
+        }`}>
+          {isLoveUnit ? '❤️' : lessonIndex + 1}
         </div>
       </div>
 
       <div className="flex-1 relative overflow-hidden flex flex-col">
         <AnimatePresence mode="wait">
           {currentStage === 'discover' && (
-            <DiscoverStage key="discover" words={lessonWords} onComplete={() => handleStageComplete('immersion')} />
+            <DiscoverStage key="discover" words={lessonWords} isLoveUnit={isLoveUnit} onComplete={() => handleStageComplete('immersion')} />
           )}
           {currentStage === 'immersion' && (
-            <ImmersionStage key="immersion" words={shuffledWords.slice(0, 4)} onComplete={() => handleStageComplete('match')} />
+            <ImmersionStage key="immersion" words={shuffledWords.slice(0, 4)} isLoveUnit={isLoveUnit} onComplete={() => handleStageComplete('speaking')} />
+          )}
+          {currentStage === 'speaking' && (
+            <SpeakingStage key="speaking" words={gameMode === 'speaking' ? lessonWords : shuffledWords.slice(0, 3)} isLoveUnit={isLoveUnit} onComplete={() => handleStageComplete(gameMode === 'speaking' ? 'finish' : 'match')} />
           )}
           {currentStage === 'match' && (
-            <MatchStage key="match" words={shuffledWords.slice(0, 5)} onComplete={() => handleStageComplete('builder')} />
+            <MatchStage key="match" words={shuffledWords.slice(0, 5)} isLoveUnit={isLoveUnit} onComplete={() => handleStageComplete('builder')} />
           )}
           {currentStage === 'builder' && (
-            <BuilderStage key="builder" words={shuffledWords.slice(0, 2)} onComplete={() => handleStageComplete('chat')} />
+            <BuilderStage key="builder" words={shuffledWords.slice(0, 2)} isLoveUnit={isLoveUnit} onComplete={() => handleStageComplete('chat')} />
           )}
           {currentStage === 'chat' && (
-            <ChatStage key="chat" words={shuffledWords.slice(0, 1)} onComplete={() => handleStageComplete('finish')} />
+            <ChatStage key="chat" words={shuffledWords.slice(0, 1)} isLoveUnit={isLoveUnit} onComplete={() => handleStageComplete('finish')} />
           )}
         </AnimatePresence>
       </div>
@@ -93,34 +119,139 @@ export const LessonEngine: React.FC<LessonEngineProps> = ({ unit, lessonIndex, g
 };
 
 // --- STAGE 1: DISCOVER ---
-const DiscoverStage: React.FC<{ words: VocabWord[], onComplete: () => void }> = ({ words, onComplete }) => {
+const DiscoverStage: React.FC<{ words: VocabWord[], isLoveUnit?: boolean, onComplete: () => void }> = ({ words, isLoveUnit, onComplete }) => {
+  const [playingIdx, setPlayingIdx] = useState<number | null>(null);
+
+  const handlePlayWord = (word: VocabWord, idx: number) => {
+    setPlayingIdx(idx);
+    playTone(580, 'sine', 0.08);
+    speakPt(word.pt);
+    setTimeout(() => {
+      setPlayingIdx(current => (current === idx ? null : current));
+    }, 1800);
+  };
+
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -100 }} className="flex-1 flex flex-col h-full bg-white dark:bg-[#09090b]">
       <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-8 pb-32">
         <div className="max-w-xl mx-auto space-y-8">
           <div className="text-center space-y-2 mb-10">
-            <h2 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight">New Vocabulary</h2>
-            <p className="text-slate-500 dark:text-slate-400 font-medium">Listen to these phrases.</p>
+            <h2 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight">
+              {isLoveUnit ? 'Love Phrases for Sujan ❤️' : 'New Vocabulary'}
+            </h2>
+            <p className="text-slate-500 dark:text-slate-400 font-medium">
+              {isLoveUnit ? 'Listen to these sweet European Portuguese love phrases.' : 'Listen and tap to hear authentic Lisbon pronunciation.'}
+            </p>
           </div>
-          <div className="space-y-3">
-            {words.map((word, idx) => (
-              <motion.div key={idx} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }} className="flex items-center justify-between p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#18181b] border-2 border-slate-100 dark:border-white/5 shadow-sm active:scale-[0.98] transition-transform cursor-pointer" onClick={() => { playTone(580, 'sine', 0.08); speakPt(word.pt); }}>
-                <div className="flex-1 min-w-0 pr-4">
-                  <h3 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-white truncate mb-1">{word.pt}</h3>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-slate-400 dark:text-slate-500 truncate">{word.en}</span>
-                    {word.phonetic && <span className="text-sm text-[#1CB0F6] font-medium opacity-80 truncate">• /{word.phonetic}/</span>}
+          <div className="space-y-3.5">
+            {words.map((word, idx) => {
+              const isPlaying = playingIdx === idx;
+              return (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  className={`relative overflow-hidden flex items-center justify-between p-4 sm:p-5 rounded-2xl border-2 shadow-sm active:scale-[0.98] transition-all cursor-pointer ${
+                    isPlaying
+                      ? isLoveUnit
+                        ? 'bg-rose-50 dark:bg-rose-950/30 border-rose-400 ring-2 ring-rose-400/30'
+                        : 'bg-blue-50/70 dark:bg-blue-950/30 border-blue-400 ring-2 ring-blue-400/30'
+                      : isLoveUnit
+                        ? 'bg-rose-50/50 dark:bg-[#1a0c14] border-rose-100 dark:border-rose-900/40 hover:border-rose-300'
+                        : 'bg-white dark:bg-[#18181b] border-slate-100 dark:border-white/5 hover:border-blue-200 dark:hover:border-blue-900/40'
+                  }`}
+                  onClick={() => handlePlayWord(word, idx)}
+                >
+                  <div className="flex-1 min-w-0 pr-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-lg sm:text-xl font-black text-slate-800 dark:text-white truncate">
+                        {word.pt}
+                      </h3>
+                      {isPlaying && (
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider animate-pulse ${
+                          isLoveUnit ? 'bg-rose-500 text-white' : 'bg-blue-600 text-white'
+                        }`}>
+                          Speaking
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <span className="text-sm font-semibold text-slate-600 dark:text-slate-300 truncate">
+                        {word.en}
+                      </span>
+
+                      {/* Dynamic Pronunciation Guide Capsule with Audio Wave Visualizer */}
+                      {word.phonetic && (
+                        <div className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg border text-xs font-mono font-bold transition-colors ${
+                          isPlaying
+                            ? isLoveUnit
+                              ? 'bg-rose-500/15 border-rose-400 text-rose-600 dark:text-rose-300'
+                              : 'bg-blue-500/15 border-blue-400 text-blue-600 dark:text-blue-300'
+                            : 'bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400'
+                        }`}>
+                          <span>/{word.phonetic}/</span>
+                          <AudioWaveVisualizer
+                            isPlaying={isPlaying}
+                            size="xs"
+                            barsCount={5}
+                            color={isLoveUnit ? 'rose' : 'blue'}
+                          />
+                        </div>
+                      )}
+
+                      {word.nepali && (
+                        <span className="text-xs text-rose-500 font-bold truncate bg-rose-500/10 px-2 py-0.5 rounded-md">
+                          🇳🇵 {word.nepali}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <button className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-[#1CB0F6]/10 text-[#1CB0F6]"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="ml-1"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></button>
-              </motion.div>
-            ))}
+
+                  {/* Audio Button with Visualizer Waves */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePlayWord(word, idx);
+                    }}
+                    className={`relative flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-2xl transition-all shadow-sm ${
+                      isPlaying
+                        ? isLoveUnit
+                          ? 'bg-rose-500 text-white shadow-rose-500/30 scale-105'
+                          : 'bg-blue-600 text-white shadow-blue-500/30 scale-105'
+                        : isLoveUnit
+                          ? 'bg-rose-500/10 text-rose-500 hover:bg-rose-500/20'
+                          : 'bg-[#1CB0F6]/10 text-[#1CB0F6] hover:bg-[#1CB0F6]/20'
+                    }`}
+                    title="Play Pronunciation"
+                  >
+                    {isPlaying ? (
+                      <AudioWaveVisualizer
+                        isPlaying={true}
+                        size="sm"
+                        barsCount={5}
+                        color="white"
+                      />
+                    ) : (
+                      <Volume2 className="w-5 h-5 ml-0.5" />
+                    )}
+                  </button>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </div>
       <div className="absolute bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-white dark:from-[#09090b] pb-safe-offset-5">
         <div className="max-w-xl mx-auto">
-          <button onClick={onComplete} className="w-full h-14 sm:h-16 rounded-2xl font-black text-lg sm:text-xl text-white bg-[#58cc02] shadow-[0_6px_0_#46a302] hover:bg-[#61e002] active:translate-y-1.5 active:shadow-none transition-all flex items-center justify-center gap-2">I'M READY TO PRACTICE</button>
+          <button onClick={onComplete} className={`w-full h-14 sm:h-16 rounded-2xl font-black text-lg sm:text-xl text-white active:translate-y-1.5 active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            isLoveUnit
+              ? 'bg-gradient-to-r from-[#e11d48] to-[#f43f5e] shadow-[0_6px_0_#be123c] hover:brightness-110'
+              : 'bg-[#58cc02] shadow-[0_6px_0_#46a302] hover:bg-[#61e002]'
+          }`}>
+            {isLoveUnit ? 'START ROMANTIC PRACTICE ❤️' : "I'M READY TO PRACTICE"}
+          </button>
         </div>
       </div>
     </motion.div>
@@ -133,22 +264,29 @@ const ImmersionStage: React.FC<{ words: VocabWord[], onComplete: () => void }> =
   const [options, setOptions] = useState<VocabWord[]>([]);
   const [hasError, setHasError] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
 
   const currentWord = words[currentIdx];
+
+  const triggerAudio = (text: string) => {
+    setIsPlayingAudio(true);
+    speakPt(text);
+    setTimeout(() => setIsPlayingAudio(false), 1800);
+  };
 
   useEffect(() => {
     if(!currentWord) return;
     let pool = [...words].filter(w => w.pt !== currentWord.pt).sort(() => Math.random() - 0.5).slice(0, 3);
     pool.push(currentWord);
     setOptions(pool.sort(() => Math.random() - 0.5));
-    setTimeout(() => speakPt(currentWord.pt), 500);
+    setTimeout(() => triggerAudio(currentWord.pt), 500);
   }, [currentIdx, currentWord, words]);
 
   const handleSelect = (selected: VocabWord) => {
     if (selected.pt === currentWord.pt) {
       setIsSuccess(true);
       playSuccessSound();
-      speakPt(selected.pt);
+      triggerAudio(selected.pt);
       setTimeout(() => {
         setIsSuccess(false);
         if (currentIdx < words.length - 1) setCurrentIdx(prev => prev + 1);
@@ -167,8 +305,29 @@ const ImmersionStage: React.FC<{ words: VocabWord[], onComplete: () => void }> =
     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, x: -100 }} className="flex-1 flex flex-col h-full bg-[#F9FAFB] dark:bg-[#09090b] p-6">
       <div className="flex-1 flex flex-col items-center justify-center max-w-lg mx-auto w-full">
         <motion.div animate={hasError ? { x: [-10, 10, -10, 10, 0] } : {}} transition={{ duration: 0.4 }} className="text-center space-y-6 w-full">
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-8">What do you hear?</h2>
-          <button onClick={() => speakPt(currentWord.pt)} className="mx-auto w-24 h-24 rounded-full bg-[#1CB0F6] text-white flex items-center justify-center shadow-[0_8px_0_#1899D6] active:translate-y-2 active:shadow-none transition-all mb-12 hover:scale-105"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="ml-2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></button>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-4">What do you hear?</h2>
+
+          {/* Enhanced Speaker Button with Dynamic Audio Wave Visualizer */}
+          <div className="relative inline-block mx-auto mb-10">
+            {isPlayingAudio && (
+              <div className="absolute inset-0 rounded-full bg-[#1CB0F6]/20 audio-pulse-ring pointer-events-none" />
+            )}
+            <button
+              onClick={() => triggerAudio(currentWord.pt)}
+              className={`relative mx-auto w-24 h-24 rounded-full bg-[#1CB0F6] text-white flex flex-col items-center justify-center shadow-[0_8px_0_#1899D6] active:translate-y-2 active:shadow-none transition-all hover:scale-105 cursor-pointer ${
+                isPlayingAudio ? 'ring-4 ring-cyan-300' : ''
+              }`}
+            >
+              <Volume2 className="w-8 h-8 mb-1" />
+              <AudioWaveVisualizer
+                isPlaying={isPlayingAudio}
+                size="xs"
+                barsCount={5}
+                color="white"
+              />
+            </button>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             {options.map((opt, idx) => (
               <button key={idx} onClick={() => handleSelect(opt)} disabled={isSuccess} className={`aspect-square rounded-[32px] p-6 flex items-center justify-center text-xl sm:text-2xl font-black transition-all border-2 shadow-sm ${isSuccess && opt.pt === currentWord.pt ? 'bg-[#58cc02]/20 border-[#58cc02] text-[#58cc02] scale-105' : 'bg-white dark:bg-[#18181b] border-slate-200 dark:border-white/10 text-slate-700 dark:text-white hover:border-[#1CB0F6] active:scale-95'}`}>{opt.pt}</button>

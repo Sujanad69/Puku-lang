@@ -49,7 +49,7 @@ export const StudyLoungeModal: React.FC<StudyLoungeModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col bg-white dark:bg-[#121212] overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+    <div className="fixed inset-0 z-[9999] flex flex-col bg-white dark:bg-[#121212] overflow-hidden ios-modal-scale-in">
       
       {/* Top Header - Duolingo Style Progress Bar */}
       <div className="flex items-center justify-between px-4 py-4 pt-safe z-10 bg-white/80 dark:bg-black/80 backdrop-blur-lg border-b border-black/5 dark:border-white/10">

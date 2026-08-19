@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChatMessage } from '../types';
 import { speakPt, playTone } from '../utils/audio';
+import { triggerHaptic } from '../utils/haptics';
+import { X, Volume2, Sparkles, Send, Bot, Heart, MessageSquare } from 'lucide-react';
+import { FlagPortugal } from './icons/PremiumIcons';
 
 interface AITutorChatProps {
   onClose?: () => void;
@@ -32,6 +35,9 @@ export const AITutorChat: React.FC<AITutorChatProps> = ({ onClose }) => {
     const textToSend = customText || inputText;
     if (!textToSend.trim() || isLoading) return;
 
+    triggerHaptic('light');
+    playTone(600, 'sine', 0.04);
+
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
       sender: 'user',
@@ -42,7 +48,6 @@ export const AITutorChat: React.FC<AITutorChatProps> = ({ onClose }) => {
     setMessages(prev => [...prev, userMsg]);
     if (!customText) setInputText('');
     setIsLoading(true);
-    playTone(600, 'sine', 0.05);
 
     try {
       const response = await fetch('/api/tutor', {
@@ -55,7 +60,7 @@ export const AITutorChat: React.FC<AITutorChatProps> = ({ onClose }) => {
       });
 
       const data = await response.json();
-      const replyText = data.reply || 'Muito bem, amor! Continua assim! ❤️';
+      const replyText = data.reply || 'Muito bem, amor! Continua assim!';
 
       // Parse optional English translation in brackets if present
       let mainText = replyText;
@@ -83,7 +88,7 @@ export const AITutorChat: React.FC<AITutorChatProps> = ({ onClose }) => {
         {
           id: Date.now().toString(),
           sender: 'sujan',
-          text: 'Muito bem! Estou muito orgulhoso de ti! ❤️',
+          text: 'Muito bem! Estou muito orgulhoso de ti!',
           translation: 'Very good! I am so proud of you!',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
@@ -94,7 +99,7 @@ export const AITutorChat: React.FC<AITutorChatProps> = ({ onClose }) => {
   };
 
   const starterPrompts = [
-    'Olá Sujan! ❤️',
+    'Olá Sujan!',
     'Estou com saudades tuas',
     'Como foi o teu dia, amor?',
     'És o meu príncipe',
@@ -102,136 +107,152 @@ export const AITutorChat: React.FC<AITutorChatProps> = ({ onClose }) => {
   ];
 
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col bg-white overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-300">
-      {/* Top Bar */}
-      <div className="flex items-center justify-between border-b border-black/5 bg-black p-4 text-white">
-        <div className="flex items-center gap-3">
-          <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#2563eb] font-black text-white shadow-md">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-            <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-400 ring-2 ring-slate-900" />
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-xl ios-fade-in">
+      
+      <div className="relative w-full max-w-2xl overflow-hidden rounded-[36px] bg-white dark:bg-[#12141a] border border-slate-200/60 dark:border-slate-800/80 shadow-2xl flex flex-col max-h-[92vh] ios-modal-scale-in">
+        
+        {/* ================= HEADER BANNER ================= */}
+        <div className="relative bg-gradient-to-br from-[#1e40af] via-[#2563eb] to-[#4f46e5] p-6 text-white text-center overflow-hidden shrink-0">
+          
+          {/* Ambient Glows */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden select-none opacity-20">
+            <div className="absolute -top-10 -right-10 w-44 h-44 bg-blue-200 rounded-full blur-2xl"></div>
+            <div className="absolute -bottom-10 -left-10 w-44 h-44 bg-indigo-300 rounded-full blur-2xl"></div>
           </div>
 
-          <div>
-            <h3 className="text-base font-extrabold flex items-center gap-1.5">
-              <span>Chat with Sujan 🇵🇹</span>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.36-7.36l-.71.71M6.34 17.66l-.71.71m12.02 0l.71.71M6.34 6.34l.71.71M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/></svg>
-            </h3>
-            <p className="text-xs font-semibold text-slate-300">
-              European Portuguese AI Practice Partner
-            </p>
+          {/* Close Button */}
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 h-9 w-9 rounded-full bg-black/20 hover:bg-black/30 flex items-center justify-center text-white transition-colors cursor-pointer backdrop-blur-md"
+              title="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
+
+          {/* Pill Badge */}
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3.5 py-1 text-[11px] font-extrabold uppercase tracking-wider backdrop-blur-md border border-white/20 mb-2 shadow-xs">
+            <Bot className="w-3.5 h-3.5 text-blue-200" />
+            <span>AI European Portuguese Practice Partner</span>
           </div>
+
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight flex items-center justify-center gap-2">
+            <span>Conversa com Sujan</span>
+            <FlagPortugal size={24} />
+          </h2>
+
+          <p className="text-xs sm:text-sm text-blue-100 font-medium mt-1 max-w-md mx-auto leading-relaxed">
+            Real-time European Portuguese chat with natural audio feedback and instant translations.
+          </p>
+
         </div>
 
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 active:scale-95 transition-all"
-            title="Close Chat"
-          >
-            ✕
-          </button>
-        )}
-      </div>
+        {/* ================= CHAT MESSAGES FEED ================= */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5 bg-slate-50/50 dark:bg-[#0e1015]">
+          {messages.map(msg => {
+            const isSujan = msg.sender === 'sujan';
 
-      {/* Messages Feed */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
-        {messages.map(msg => {
-          const isSujan = msg.sender === 'sujan';
-
-          return (
-            <div
-              key={msg.id}
-              className={`flex items-end gap-2 ${isSujan ? 'justify-start' : 'justify-end'}`}
-            >
-              {isSujan && (
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#2563eb] text-white font-black text-xs shadow-sm">
-                  S
-                </div>
-              )}
-
+            return (
               <div
-                className={`max-w-[80%] rounded-2xl p-3.5 shadow-sm space-y-1 ${
-                  isSujan
-                    ? 'bg-white border border-black/5 text-slate-900 rounded-bl-none'
-                    : 'bg-[#2563eb] text-white rounded-br-none font-medium'
-                }`}
+                key={msg.id}
+                className={`flex items-end gap-2 ${isSujan ? 'justify-start' : 'justify-end'}`}
               >
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-bold leading-relaxed">{msg.text}</p>
-                  {isSujan && (
-                    <button
-                      onClick={() => speakPt(msg.text)}
-                      className="text-[#2563eb] hover:scale-110 active:scale-95 transition-transform"
-                      title="Listen to Sujan speak European Portuguese"
-                    >
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
-                    </button>
-                  )}
-                </div>
-
-                {msg.translation && (
-                  <p className="text-xs font-semibold text-slate-500 italic border-t border-slate-100 pt-1">
-                    "{msg.translation}"
-                  </p>
+                {isSujan && (
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white font-black text-xs shadow-xs">
+                    S
+                  </div>
                 )}
 
-                <span className="block text-[9px] font-bold text-slate-400 text-right">
-                  {msg.timestamp}
-                </span>
+                <div
+                  className={`max-w-[82%] sm:max-w-[75%] rounded-3xl p-4 shadow-xs space-y-1.5 ${
+                    isSujan
+                      ? 'bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-white rounded-bl-xs'
+                      : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-br-xs font-semibold'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-sm font-bold leading-relaxed">{msg.text}</p>
+                    {isSujan && (
+                      <button
+                        onClick={() => speakPt(msg.text)}
+                        className="text-blue-600 dark:text-blue-400 hover:scale-110 active:scale-95 transition-transform shrink-0 pt-0.5 cursor-pointer"
+                        title="Listen to pronunciation"
+                      >
+                        <Volume2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+
+                  {msg.translation && (
+                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 italic border-t border-slate-100 dark:border-slate-800 pt-1.5">
+                      "{msg.translation}"
+                    </p>
+                  )}
+
+                  <span className={`block text-[10px] font-mono text-right ${
+                    isSujan ? 'text-slate-400' : 'text-blue-200'
+                  }`}>
+                    {msg.timestamp}
+                  </span>
+                </div>
               </div>
+            );
+          })}
+
+          {isLoading && (
+            <div className="flex items-center gap-2 text-slate-400 text-xs font-bold pl-2 py-2">
+              <div className="h-2 w-2 rounded-full bg-blue-600 animate-bounce" />
+              <div className="h-2 w-2 rounded-full bg-blue-600 animate-bounce [animation-delay:0.2s]" />
+              <div className="h-2 w-2 rounded-full bg-blue-600 animate-bounce [animation-delay:0.4s]" />
+              <span>Sujan is typing in Portuguese...</span>
             </div>
-          );
-        })}
+          )}
 
-        {isLoading && (
-          <div className="flex items-center gap-2 text-slate-400 text-xs font-bold pl-2">
-            <div className="h-2 w-2 rounded-full bg-[#2563eb] animate-bounce" />
-            <div className="h-2 w-2 rounded-full bg-[#2563eb] animate-bounce [animation-delay:0.2s]" />
-            <div className="h-2 w-2 rounded-full bg-[#2563eb] animate-bounce [animation-delay:0.4s]" />
-            <span>Sujan is typing in Portuguese...</span>
-          </div>
-        )}
+          <div ref={messagesEndRef} />
+        </div>
 
-        <div ref={messagesEndRef} />
-      </div>
+        {/* Quick Starter Prompts */}
+        <div className="p-2.5 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-x-auto flex gap-1.5 no-scrollbar shrink-0">
+          {starterPrompts.map((prompt, i) => (
+            <button
+              key={i}
+              onClick={() => handleSendMessage(prompt)}
+              className="shrink-0 rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 px-3 py-1 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-xs active:scale-95 hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
+            >
+              {prompt}
+            </button>
+          ))}
+        </div>
 
-      {/* Starter Prompts */}
-      <div className="p-2 border-t border-black/5 bg-slate-100 overflow-x-auto flex gap-1.5 no-scrollbar">
-        {starterPrompts.map((prompt, i) => (
-          <button
-            key={i}
-            onClick={() => handleSendMessage(prompt)}
-            className="shrink-0 rounded-full border border-black/5 bg-white px-3 py-1 text-xs font-extrabold text-slate-700 shadow-sm active:scale-95 hover:bg-blue-50 hover:text-[#2563eb]"
-          >
-            {prompt}
-          </button>
-        ))}
-      </div>
-
-      {/* Input Box */}
-      <form
-        onSubmit={e => {
-          e.preventDefault();
-          handleSendMessage();
-        }}
-        className="p-3 border-t border-black/5 bg-white flex items-center gap-2"
-      >
-        <input
-          type="text"
-          value={inputText}
-          onChange={e => setInputText(e.target.value)}
-          placeholder="Write to Sujan in Portuguese..."
-          className="flex-1 rounded-full border border-black/10 bg-slate-100 px-4 py-3 text-sm font-bold text-slate-900 outline-none focus:border-[#2563eb] focus:bg-white"
-        />
-
-        <button
-          type="submit"
-          disabled={!inputText.trim() || isLoading}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#2563eb] text-white shadow-md active:scale-90 disabled:opacity-40 transition-transform"
+        {/* ================= INPUT FOOTER ================= */}
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            handleSendMessage();
+          }}
+          className="p-3 sm:p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-[#0e1015] flex items-center gap-2 shrink-0"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-        </button>
-      </form>
+          <input
+            type="text"
+            value={inputText}
+            onChange={e => setInputText(e.target.value)}
+            placeholder="Write to Sujan in Portuguese..."
+            className="flex-1 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-colors"
+          />
+
+          <button
+            type="submit"
+            disabled={!inputText.trim() || isLoading}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
+            title="Send Message"
+          >
+            <Send className="w-4 h-4" />
+          </button>
+        </form>
+
+      </div>
+
     </div>
   );
 };
