@@ -56,6 +56,7 @@ export default function App() {
     progress, 
     setProgress, 
     user, 
+    loading,
     loginWithGoogle,
     loginWithEmail,
     signupWithEmail,
@@ -63,7 +64,6 @@ export default function App() {
     logout 
   } = useFirebaseProgress();
 
-  const [isGuestMode, setIsGuestMode] = useState(false);
   const [activeModal, setActiveModal] = useState<ActiveModal>('none');
   const [selectedUnitId, setSelectedUnitId] = useState<string>('unit1');
   const [selectedLessonIndex, setSelectedLessonIndex] = useState<number>(0);
@@ -417,14 +417,41 @@ export default function App() {
 
   const selectedUnit = isGlobalArcade && globalArcadeUnit ? globalArcadeUnit : (UNITS_DATA[selectedUnitId] || UNITS_DATA.unit1);
 
-  if (!user && !isGuestMode) {
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#060e1d] flex items-center justify-center text-white">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (!progress.hasSeenOnboarding) {
+    return (
+      <div className={`min-h-screen ${theme === 'dark' ? 'dark bg-black text-white' : 'bg-transparent text-black'} relative`}>
+        <OnboardingModal 
+          lang={lang} 
+          onComplete={(prefs) => {
+            setProgress(prev => ({ 
+              ...prev, 
+              hasSeenOnboarding: true,
+              dailyGoalXP: prefs?.dailyGoalXP || prev.dailyGoalXP || 50
+            }));
+            if (prefs?.nickname) {
+              updateSpeech('🎉', `Bem-vinda, ${prefs.nickname}! Let's start Unit 1! ✨`);
+            }
+          }} 
+        />
+      </div>
+    );
+  }
+
+  if (!user) {
     return (
       <AuthWelcomeScreen
         loginWithGoogle={loginWithGoogle}
         loginWithEmail={loginWithEmail}
         signupWithEmail={signupWithEmail}
         sendPasswordReset={sendPasswordReset}
-        onContinueAsGuest={() => setIsGuestMode(true)}
         onSuccess={(msg) => {
           showToast(msg);
         }}
@@ -1104,22 +1131,6 @@ export default function App() {
         />
       )}
 
-      {!progress.hasSeenOnboarding && (
-        <OnboardingModal 
-          lang={lang} 
-          onComplete={(prefs) => {
-            setProgress(prev => ({ 
-              ...prev, 
-              hasSeenOnboarding: true,
-              dailyGoalXP: prefs?.dailyGoalXP || prev.dailyGoalXP || 50
-            }));
-            if (prefs?.nickname) {
-              updateSpeech('🎉', `Bem-vinda, ${prefs.nickname}! Let's start Unit 1! ✨`);
-            }
-          }} 
-        />
-      )}
-
       {activeModal === 'auth' && (
         <AuthModal
           isOpen={activeModal === 'auth'}
@@ -1138,9 +1149,8 @@ export default function App() {
       <ConfettiEffect active={showConfetti} />
       <PukuCompanion />
       
-      {/* Floating Minimalist iOS Glass Tab Bar */
-}
-      {['none', 'wardrobe', 'vault'].includes(activeModal) && (
+      {/* Floating Minimalist iOS Glass Tab Bar */}
+      {user && progress.hasSeenOnboarding && ['none', 'wardrobe', 'vault'].includes(activeModal) && (
         <FloatingGlassTabBar
           activeModal={activeModal}
           onChangeTab={setActiveModal}

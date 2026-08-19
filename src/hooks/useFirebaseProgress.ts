@@ -3,6 +3,8 @@ import { UserProgress } from '../types';
 import { auth, db, googleProvider } from '../lib/firebase';
 import { 
   signInWithPopup, 
+  signInWithRedirect,
+  getRedirectResult,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
@@ -45,6 +47,11 @@ export function useFirebaseProgress() {
   };
 
   useEffect(() => {
+    // Check for redirect result when returning from Google redirect auth
+    getRedirectResult(auth).catch((err) => {
+      console.warn("Redirect sign-in result error:", err);
+    });
+
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       
@@ -100,7 +107,7 @@ export function useFirebaseProgress() {
   // Auth Methods
   const loginWithGoogle = async () => {
     try {
-      // Ensure persistence is active before popup
+      // Ensure persistence is active before auth
       try {
         await setPersistence(auth, browserLocalPersistence);
       } catch {
@@ -109,31 +116,40 @@ export function useFirebaseProgress() {
         } catch {}
       }
 
-      const result = await signInWithPopup(auth, googleProvider);
-      return { success: true, user: result.user };
+      // Check if running on mobile device or if popup fails
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      
+      try {
+        const result = await signInWithPopup(auth, googleProvider);
+        return { success: true, user: result.user };
+      } catch (popupError: any) {
+        // If popup is blocked by Safari or user is on mobile, try redirect
+        if (popupError?.code === 'auth/popup-blocked' || isMobile) {
+          try {
+            await signInWithRedirect(auth, googleProvider);
+            return { success: true };
+          } catch (redirectErr: any) {
+            throw redirectErr;
+          }
+        }
+        throw popupError;
+      }
     } catch (error: any) {
       console.warn("Google login warning:", error);
       
-      // If error is related to IndexedDB closing in iframe, retry once with in-memory persistence
-      if (error?.message?.includes('Database is closing') || error?.code === 'auth/internal-error') {
-        try {
-          await setPersistence(auth, inMemoryPersistence);
-          const retryResult = await signInWithPopup(auth, googleProvider);
-          return { success: true, user: retryResult.user };
-        } catch (retryErr: any) {
-          console.warn("Google login retry warning:", retryErr);
-        }
-      }
+      let errorMsg = "Google Sign-In was cancelled or unavailable.";
 
-      let errorMsg = "Google Sign-In was cancelled or unavailable in this window.";
-      if (error?.code === 'auth/popup-closed-by-user') {
+      if (error?.code === 'auth/unauthorized-domain') {
+        const domain = typeof window !== 'undefined' ? window.location.hostname : 'your domain';
+        errorMsg = `Domain "${domain}" is not authorized in Firebase Console yet. Please add it to Firebase Auth > Settings > Authorized Domains, or sign in using Email / Guest mode!`;
+      } else if (error?.code === 'auth/popup-closed-by-user') {
         errorMsg = "Sign-in popup was closed. Please try again or use Email login.";
       } else if (error?.code === 'auth/popup-blocked') {
-        errorMsg = "Popup was blocked by the browser. Please allow popups or use Email login.";
+        errorMsg = "Popup was blocked by browser. Please enable popups or use Email login.";
       } else if (error?.code === 'auth/cancelled-popup-request') {
-        errorMsg = "Only one sign-in request can be processed at a time.";
+        errorMsg = "Sign-in request was cancelled. Please try again.";
       } else if (error?.message?.includes('Database is closing')) {
-        errorMsg = "Session was interrupted. Please try again or create an account with Email & Password!";
+        errorMsg = "Session was interrupted. Please try again or sign in with Email & Password!";
       }
 
       return { success: false, error: errorMsg };

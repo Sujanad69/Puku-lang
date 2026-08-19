@@ -21,7 +21,6 @@ interface AuthWelcomeScreenProps {
   loginWithEmail: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
   signupWithEmail: (email: string, pass: string, displayName?: string) => Promise<{ success: boolean; error?: string }>;
   sendPasswordReset: (email: string) => Promise<{ success: boolean; error?: string }>;
-  onContinueAsGuest: () => void;
   onSuccess: (message: string) => void;
 }
 
@@ -30,7 +29,6 @@ export const AuthWelcomeScreen: React.FC<AuthWelcomeScreenProps> = ({
   loginWithEmail,
   signupWithEmail,
   sendPasswordReset,
-  onContinueAsGuest,
   onSuccess,
 }) => {
   const [authMode, setAuthMode] = useState<'welcome' | 'email_signin' | 'email_signup' | 'forgot'>('welcome');
@@ -230,20 +228,6 @@ export const AuthWelcomeScreen: React.FC<AuthWelcomeScreenProps> = ({
                 <Sparkles className="w-4 h-4 text-[#ffd60a]" />
                 <span>Create New Account</span>
               </button>
-
-              {/* Continue As Guest */}
-              <div className="pt-2 text-center">
-                <button
-                  onClick={() => {
-                    playTone(600, 'sine', 0.04);
-                    triggerHaptic('light');
-                    onContinueAsGuest();
-                  }}
-                  className="text-xs font-semibold text-slate-400 hover:text-white transition-colors underline cursor-pointer"
-                >
-                  Explore as Guest (Offline Mode)
-                </button>
-              </div>
             </div>
           )}
 

@@ -118,9 +118,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete, la
   const current = steps[currentStep];
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/75 backdrop-blur-xl ios-fade-in">
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-2xl ios-fade-in">
       
-      <div className="relative w-full max-w-md overflow-hidden rounded-[36px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col max-h-[92vh] ios-modal-scale-in">
+      <div className="relative w-full max-w-md overflow-hidden rounded-[36px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col max-h-[84vh] sm:max-h-[88vh] ios-modal-scale-in">
         
         {/* Top Header Card */}
         <div className={`relative bg-gradient-to-br ${current.accentColor} p-6 text-white text-center transition-all duration-500 overflow-hidden shrink-0`}>
@@ -376,10 +376,10 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete, la
         </div>
 
         {/* Footer Action Button */}
-        <div className="p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 shrink-0">
+        <div className="p-4 sm:p-5 pb-[max(env(safe-area-inset-bottom),1.25rem)] border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 shrink-0">
           <button
             onClick={handleNext}
-            className={`w-full py-4 rounded-2xl bg-gradient-to-r ${current.accentColor} text-white font-bold text-sm shadow-lg hover:shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer`}
+            className={`w-full py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r ${current.accentColor} text-white font-bold text-sm shadow-lg hover:shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer`}
           >
             <span>{currentStep === steps.length - 1 ? "Bora lá! Start Learning 🚀" : "Continue"}</span>
             <ChevronRight className="w-4 h-4" />
