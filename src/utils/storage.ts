@@ -5,10 +5,10 @@ const STORAGE_KEY = 'portuguese_puku_progress_v3';
 
 export const INITIAL_PROGRESS: UserProgress = {
   xp: 0,
-  coins: 20,
-  gems: 1,
+  coins: 0,
+  gems: 0,
   hearts: 5,
-  streak: 1,
+  streak: 0,
   lastPlayDate: new Date().toISOString().split('T')[0],
   purchasedOutfits: ['base'],
   currentOutfitId: 'base',
@@ -19,6 +19,7 @@ export const INITIAL_PROGRESS: UserProgress = {
   dailyGoalXP: 50,
   remindersEnabled: true,
   themeDark: true,
+  hasSeenOnboarding: false,
   completedUnits: [],
   completedLessons: {},
   quests: {},

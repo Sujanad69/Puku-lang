@@ -75,69 +75,24 @@ export const LisboaHeroBanner: React.FC<LisboaHeroBannerProps> = ({
   return (
     <section 
       onClick={handleSpeakWord}
-      className="relative overflow-hidden rounded-[32px] text-white shadow-[0_14px_40px_-10px_rgba(0,122,255,0.4)] cursor-pointer transition-transform active:scale-[0.98] group p-6 sm:p-8"
+      className="relative overflow-hidden rounded-[32px] text-white shadow-[0_10px_30px_-5px_rgba(0,122,255,0.35)] cursor-pointer transition-transform active:scale-[0.985] group p-6 sm:p-8 transform-gpu"
       style={{
-        background: 'linear-gradient(135deg, #071329 0%, #034078 35%, #0284c7 65%, #0d9488 85%, #007AFF 100%)',
-        backgroundSize: '250% 250%',
-        animation: 'oceanGradient 16s ease infinite'
+        background: 'linear-gradient(135deg, #071329 0%, #034078 40%, #0284c7 75%, #007AFF 100%)',
+        transform: 'translateZ(0)'
       }}
     >
-      <style>
-        {`
-          @keyframes oceanGradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-          }
-          @keyframes ptAura1 {
-            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-            33% { transform: translate(25%, -15%) scale(1.15) rotate(90deg); }
-            66% { transform: translate(-15%, 20%) scale(0.9) rotate(180deg); }
-            100% { transform: translate(0, 0) scale(1) rotate(360deg); }
-          }
-          @keyframes ptAura2 {
-            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-            50% { transform: translate(-25%, 25%) scale(1.05) rotate(-90deg); }
-            100% { transform: translate(0, 0) scale(1) rotate(-180deg); }
-          }
-          @keyframes ptAuraGold {
-            0% { transform: translate(-10%, 10%) scale(0.9); opacity: 0.25; }
-            50% { transform: translate(20%, -20%) scale(1.2); opacity: 0.45; }
-            100% { transform: translate(-10%, 10%) scale(0.9); opacity: 0.25; }
-          }
-          @keyframes driveRight {
-            from { transform: translateX(-200px); }
-            to { transform: translateX(1200px); }
-          }
-          @keyframes driveLeft {
-            from { transform: translateX(1200px); }
-            to { transform: translateX(-300px); }
-          }
-          @keyframes lisbonSeagulls {
-            0% { transform: translate(-100px, 20px) scale(0.7); opacity: 0; }
-            15% { opacity: 0.8; }
-            85% { opacity: 0.8; }
-            100% { transform: translate(1100px, -40px) scale(0.9); opacity: 0; }
-          }
-          @keyframes waveRipple {
-            0%, 100% { transform: translateX(0); }
-            50% { transform: translateX(-25px); }
-          }
-        `}
-      </style>
-
-      {/* ================= iOS PORTUGAL FLUID AURA BACKGROUND ================= */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden mix-blend-screen opacity-70">
-         {/* Deep Ocean Blue Aura */}
-         <div className="absolute top-[-25%] left-[-15%] w-[85%] h-[85%] bg-[#0055ff] rounded-full blur-[80px] animate-[ptAura1_15s_ease-in-out_infinite]" />
-         {/* Portuguese Emerald & Cyan Aura */}
-         <div className="absolute bottom-[-20%] right-[-10%] w-[80%] h-[80%] bg-[#00b4d8] rounded-full blur-[75px] animate-[ptAura2_18s_ease-in-out_infinite]" />
-         {/* Warm Portuguese Gold Aura (Sunset over Tagus River) */}
-         <div className="absolute top-[10%] right-[20%] w-[50%] h-[50%] bg-[#f59e0b] rounded-full blur-[90px] animate-[ptAuraGold_12s_ease-in-out_infinite]" />
+      {/* ================= iOS PORTUGAL FLUID AURA BACKGROUND (GPU OPTIMIZED) ================= */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-50 mix-blend-screen">
+         {/* Deep Ocean Blue Accent */}
+         <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-[#0055ff]/40 rounded-full blur-[40px]" />
+         {/* Portuguese Emerald & Cyan Accent */}
+         <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-[#00b4d8]/30 rounded-full blur-[40px]" />
+         {/* Warm Portuguese Gold Accent */}
+         <div className="absolute top-[10%] right-[15%] w-[40%] h-[40%] bg-[#f59e0b]/20 rounded-full blur-[40px]" />
       </div>
 
       {/* ================= LISBON HISTORIC ARCHITECTURE & 25 DE ABRIL DOUBLE DECK BRIDGE ================= */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-[0.28] mix-blend-overlay">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-[0.25] mix-blend-overlay">
         <svg className="absolute bottom-[-2%] w-full h-[200px]" viewBox="0 0 1000 200" preserveAspectRatio="xMidYMax slice">
           
           {/* Lisbon Historic Skyline / Belém Tower & Castle Hill Silhouettes */}

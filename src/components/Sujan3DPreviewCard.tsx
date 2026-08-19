@@ -74,14 +74,25 @@ export const Sujan3DPreviewCard: React.FC<Sujan3DPreviewCardProps> = ({
           camera-controls
           autoplay
           seamless-poster
+          power-preference="high-performance"
+          interpolation-decay="100"
+          animation-crossfade-duration="300"
           camera-target="0m 1.15m 0m"
           camera-orbit="0deg 85deg 1.7m"
           field-of-view="30deg"
           environment-image="https://sujanad69.github.io/Pukumodel/studio_small_08_2k.hdr"
           exposure="1.0"
-          shadow-intensity="1.6"
-          shadow-softness="0.9"
-          style={{ width: '100%', height: '100%', outline: 'none', position: 'relative', zIndex: 10 }}
+          shadow-intensity="0.8"
+          shadow-softness="0.5"
+          style={{ 
+            width: '100%', 
+            height: '100%', 
+            outline: 'none', 
+            position: 'relative', 
+            zIndex: 10,
+            transform: 'translateZ(0)',
+            willChange: 'transform'
+          }}
         />
       </div>
     </div>

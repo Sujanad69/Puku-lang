@@ -10,7 +10,8 @@ import {
 } from './types';
 import { 
   loadUserProgress, 
-  saveUserProgress
+  saveUserProgress,
+  INITIAL_PROGRESS
 } from './utils/storage';
 import { UNITS_DATA, ALL_WORDS_FLAT } from './data/portugueseData';
 import { playSuccessSound, playTone, speakPt } from './utils/audio';
@@ -32,6 +33,7 @@ import { ConfettiEffect } from './components/ConfettiEffect';
 import { PukuCompanion } from './components/PukuCompanion';
 import { OnboardingModal } from './components/OnboardingModal';
 import { AuthModal } from './components/AuthModal';
+import { AuthWelcomeScreen } from './components/AuthWelcomeScreen';
 import { LovePhrasesModal } from './components/LovePhrasesModal';
 import { FlashcardModal } from './components/FlashcardModal';
 import { StoryModeModal } from './components/StoryModeModal';
@@ -60,7 +62,8 @@ export default function App() {
     sendPasswordReset,
     logout 
   } = useFirebaseProgress();
-  const [showOnboarding, setShowOnboarding] = useState(!progress.hasSeenOnboarding);
+
+  const [isGuestMode, setIsGuestMode] = useState(false);
   const [activeModal, setActiveModal] = useState<ActiveModal>('none');
   const [selectedUnitId, setSelectedUnitId] = useState<string>('unit1');
   const [selectedLessonIndex, setSelectedLessonIndex] = useState<number>(0);
@@ -276,27 +279,36 @@ export default function App() {
   ) => {
     playSuccessSound();
     incrementQuestProgress('quiz');
-    if (perfectGem) {
+    const isFlawless = score === total;
+    const isHighScore = score >= Math.ceil(total * 0.8);
+    const gemReward = isFlawless ? 2 : isHighScore ? 1 : 0;
+    const coinReward = isFlawless ? Math.max(earnedCoins, 20) : isHighScore ? Math.max(earnedCoins, 15) : Math.max(earnedCoins, 10);
+    const xpReward = isFlawless ? Math.max(earnedXP, 35) : Math.max(earnedXP, 20);
+
+    if (isFlawless) {
       incrementQuestProgress('perfect');
     }
 
     setProgress(prev => ({
       ...prev,
-      xp: prev.xp + earnedXP,
-      todayXP: prev.todayXP + earnedXP,
-      coins: prev.coins + earnedCoins,
-      gems: perfectGem ? prev.gems + 1 : prev.gems,
+      xp: prev.xp + xpReward,
+      todayXP: prev.todayXP + xpReward,
+      coins: prev.coins + coinReward,
+      gems: prev.gems + gemReward,
       hearts: isQuizRecoveryMode ? Math.min(5, prev.hearts + 1) : prev.hearts,
     }));
 
-    if (perfectGem) {
+    if (isFlawless) {
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 5000);
-      showToast(`Perfect 100%! Earned +${earnedXP} XP, +${earnedCoins} Coins, and +1 Gem!`);
-      updateSpeech('🎉', 'PERFECT SCORE! Sujan is so proud of you! You earned a Gem!');
+      showToast(`FLAWLESS 100%! +${xpReward} XP, +${coinReward} Coins, and +2 Gems 💎💎!`);
+      updateSpeech('🎉', 'PERFECT SCORE! Sujan is so proud of you! +2 Gems earned! 💎💎');
+    } else if (isHighScore) {
+      showToast(`Great Score: ${score}/${total}! +${xpReward} XP, +${coinReward} Coins & +1 Gem 💎!`);
+      updateSpeech('🐵', `Super work! Score: ${score}/${total}! +1 Gem earned! 💎`);
     } else {
-      showToast(`Quiz Complete! Score: ${score}/${total}. Earned +${earnedXP} XP & +${earnedCoins} Coins!`);
-      updateSpeech('🐵', `Great effort! You got ${score}/${total} right! Keep going!`);
+      showToast(`Quiz Complete! Score: ${score}/${total}. +${xpReward} XP & +${coinReward} Coins 🪙!`);
+      updateSpeech('🐵', `Good practice! You got ${score}/${total} right! Keep going!`);
     }
 
     setActiveModal('none');
@@ -404,6 +416,21 @@ export default function App() {
   };
 
   const selectedUnit = isGlobalArcade && globalArcadeUnit ? globalArcadeUnit : (UNITS_DATA[selectedUnitId] || UNITS_DATA.unit1);
+
+  if (!user && !isGuestMode) {
+    return (
+      <AuthWelcomeScreen
+        loginWithGoogle={loginWithGoogle}
+        loginWithEmail={loginWithEmail}
+        signupWithEmail={signupWithEmail}
+        sendPasswordReset={sendPasswordReset}
+        onContinueAsGuest={() => setIsGuestMode(true)}
+        onSuccess={(msg) => {
+          showToast(msg);
+        }}
+      />
+    );
+  }
 
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'dark bg-black text-white' : 'bg-transparent text-black'} pb-32 md:pb-40 transition-colors duration-300`} style={{ fontFamily: 'var(--ios-font-stack)' }}>
@@ -673,7 +700,7 @@ export default function App() {
 
         {/* TAB 3: ACHIEVEMENTS & VAULT ONLY */}
         {activeModal === 'vault' && (
-          <div className="ios-modal-scale-in">
+          <main className="w-full max-w-4xl mx-auto space-y-6 ios-fade-in">
             <VaultAndStatsModal
               progress={progress}
               onClose={() => setActiveModal('none')}
@@ -709,7 +736,7 @@ export default function App() {
                 );
               }}
             />
-          </div>
+          </main>
         )}
 
         {/* DAILY QUESTS & REWARD VAULT MODAL */}
@@ -1060,22 +1087,24 @@ export default function App() {
         <StoryModeModal
           onClose={() => setActiveModal('none')}
           onComplete={(xp) => {
-            const coinGain = 5;
+            const coinGain = 15;
+            const gemGain = 1;
             setProgress(prev => ({
               ...prev,
               xp: prev.xp + xp,
               todayXP: prev.todayXP + xp,
               coins: prev.coins + coinGain,
+              gems: prev.gems + gemGain,
             }));
             setActiveModal('none');
             setShowConfetti(true);
-            setTimeout(() => setShowConfetti(false), 3000);
-            showToast(`Story Completed! +${xp} XP & +${coinGain} Coins!`);
+            setTimeout(() => setShowConfetti(false), 3500);
+            showToast(`Story Completed! +${xp} XP, +${coinGain} Coins & +1 Gem 💎!`);
           }}
         />
       )}
 
-      {showOnboarding && (
+      {!progress.hasSeenOnboarding && (
         <OnboardingModal 
           lang={lang} 
           onComplete={(prefs) => {
@@ -1084,7 +1113,6 @@ export default function App() {
               hasSeenOnboarding: true,
               dailyGoalXP: prefs?.dailyGoalXP || prev.dailyGoalXP || 50
             }));
-            setShowOnboarding(false);
             if (prefs?.nickname) {
               updateSpeech('🎉', `Bem-vinda, ${prefs.nickname}! Let's start Unit 1! ✨`);
             }

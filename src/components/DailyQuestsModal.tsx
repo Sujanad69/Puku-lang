@@ -102,27 +102,35 @@ export const DailyQuestsModal: React.FC<DailyQuestsModalProps> = ({
             <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-rose-300 rounded-full blur-2xl"></div>
           </div>
 
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 h-9 w-9 rounded-full bg-black/20 hover:bg-black/30 flex items-center justify-center text-white transition-colors cursor-pointer backdrop-blur-md"
-            title="Close"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          {/* Top Actions Bar with Close Button */}
+          <div className="relative z-10 flex items-center justify-between gap-2 mb-3">
+            <div className="flex-1" />
 
-          {/* Wallet summary in header */}
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-black backdrop-blur-md border border-white/25 shadow-xs">
-              <GoldCoin size={14} />
-              <span>{progress.coins} Coins</span>
+            {/* Wallet summary in header */}
+            <div className="flex items-center justify-center gap-1.5 sm:gap-2.5 overflow-x-auto max-w-[240px] sm:max-w-none">
+              <div className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-black backdrop-blur-md border border-white/25 shadow-xs whitespace-nowrap">
+                <GoldCoin size={13} />
+                <span>{progress.coins}</span>
+              </div>
+              <div className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-black backdrop-blur-md border border-white/25 shadow-xs whitespace-nowrap">
+                <Gem className="w-3 h-3 text-purple-200" />
+                <span>{progress.gems}</span>
+              </div>
+              <div className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-black backdrop-blur-md border border-white/25 shadow-xs whitespace-nowrap">
+                <Heart className="w-3 h-3 text-rose-200 fill-current" />
+                <span>{progress.hearts}/5</span>
+              </div>
             </div>
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-black backdrop-blur-md border border-white/25 shadow-xs">
-              <Gem className="w-3.5 h-3.5 text-purple-200" />
-              <span>{progress.gems} Gems</span>
-            </div>
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-black backdrop-blur-md border border-white/25 shadow-xs">
-              <Heart className="w-3.5 h-3.5 text-rose-200 fill-current" />
-              <span>{progress.hearts}/5 Hearts</span>
+
+            {/* Close Button */}
+            <div className="flex-1 flex justify-end">
+              <button
+                onClick={onClose}
+                className="h-8 w-8 rounded-full bg-black/20 hover:bg-black/30 flex items-center justify-center text-white transition-colors cursor-pointer backdrop-blur-md shrink-0"
+                title="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
           </div>
 

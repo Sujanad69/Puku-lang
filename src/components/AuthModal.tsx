@@ -14,6 +14,13 @@ import {
   ShieldCheck,
   Heart
 } from 'lucide-react';
+import { 
+  FlagPortugal, 
+  PukuMonkeyIcon, 
+  CrownPrincessIcon, 
+  CherryFlowerIcon, 
+  CoffeeCupIcon 
+} from './icons/PremiumIcons';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -26,11 +33,11 @@ interface AuthModalProps {
 }
 
 const AVATAR_OPTIONS = [
-  { id: 'puku', emoji: '🐒', label: 'Puku' },
-  { id: 'lisbon', emoji: '🇵🇹', label: 'Lisbon' },
-  { id: 'princess', emoji: '👑', label: 'Princess' },
-  { id: 'flower', emoji: '🌸', label: 'Maya' },
-  { id: 'coffee', emoji: '☕', label: 'Bica' }
+  { id: 'puku', icon: PukuMonkeyIcon, label: 'Puku' },
+  { id: 'lisbon', icon: FlagPortugal, label: 'Lisbon' },
+  { id: 'princess', icon: CrownPrincessIcon, label: 'Princess' },
+  { id: 'flower', icon: CherryFlowerIcon, label: 'Maya' },
+  { id: 'coffee', icon: CoffeeCupIcon, label: 'Bica' }
 ];
 
 const NICKNAME_PRESETS = ["Amisha", "Puntey", "Maya", "Sujan"];
@@ -166,8 +173,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </button>
 
           {/* Portuguese Mascot Icon */}
-          <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 text-3xl shadow-lg backdrop-blur-md border border-white/30">
-            {mode === 'signup' ? '🇵🇹' : '🐒'}
+          <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 shadow-lg backdrop-blur-md border border-white/30">
+            {mode === 'signup' ? <FlagPortugal size={32} /> : <PukuMonkeyIcon size={36} />}
           </div>
 
           <h3 className="text-xl font-bold tracking-tight text-white">

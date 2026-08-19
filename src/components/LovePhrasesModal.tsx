@@ -95,19 +95,26 @@ export const LovePhrasesModal: React.FC<LovePhrasesModalProps> = ({
             </svg>
           </div>
 
-          {/* Close Button */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 h-9 w-9 rounded-full bg-black/20 hover:bg-black/30 flex items-center justify-center text-white transition-colors cursor-pointer backdrop-blur-md"
-            title="Close"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          {/* Top Actions Bar (No overlap on mobile) */}
+          <div className="relative z-10 flex items-center justify-between gap-2 mb-3">
+            <div className="flex-1" />
 
-          {/* Romantic Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3.5 py-1 text-[11px] font-extrabold uppercase tracking-wider backdrop-blur-md border border-white/20 mb-2 shadow-xs">
-            <Heart className="w-3.5 h-3.5 fill-current text-white animate-pulse" />
-            <span>Messages for Sujan • Love Unit</span>
+            {/* Romantic Badge */}
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider backdrop-blur-md border border-white/20 shadow-xs max-w-[200px] sm:max-w-none truncate">
+              <Heart className="w-3.5 h-3.5 fill-current text-white animate-pulse shrink-0" />
+              <span className="truncate">Love Unit • Sujan ❤️ Amisha</span>
+            </div>
+
+            {/* Close Button */}
+            <div className="flex-1 flex justify-end">
+              <button
+                onClick={onClose}
+                className="h-8 w-8 rounded-full bg-black/20 hover:bg-black/30 flex items-center justify-center text-white transition-colors cursor-pointer backdrop-blur-md shrink-0"
+                title="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">

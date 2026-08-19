@@ -2,33 +2,92 @@ import React, { useState, useRef, useEffect } from 'react';
 import { User } from 'firebase/auth';
 import { UserProgress } from '../types';
 import { 
-  User as UserIcon, 
-  LogIn, 
   LogOut, 
-  Coins, 
-  Gem, 
-  Heart, 
   Sun, 
   Moon, 
   Globe, 
-  Settings, 
-  Sparkles, 
-  ShieldCheck, 
-  ChevronDown, 
-  Flame, 
-  Activity, 
-  X 
 } from 'lucide-react';
 import { playTone } from '../utils/audio';
 import { triggerHaptic } from '../utils/haptics';
+
+// Crisp Apple HIG Minimal Vector Icons (Exact same as 3D Outfit panel)
+const SvgCoin = ({ size = 15, style = {} }: { size?: number; style?: React.CSSProperties }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={style}>
+    <circle cx="12" cy="12" r="9.5"></circle>
+    <line x1="12" y1="8" x2="12" y2="16"></line>
+    <line x1="8" y1="12" x2="16" y2="12"></line>
+  </svg>
+);
+
+const SvgGem = ({ size = 15, style = {} }: { size?: number; style?: React.CSSProperties }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={style}>
+    <polygon points="12 2 2 7 12 22 22 7 12 2"></polygon>
+    <polyline points="2 7 12 7 22 7"></polyline>
+    <polyline points="12 22 12 7"></polyline>
+  </svg>
+);
+
+const SvgHeart = ({ size = 15, style = {} }: { size?: number; style?: React.CSSProperties }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={style}>
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+  </svg>
+);
+
+const SvgSettings = ({ size = 15, style = {} }: { size?: number; style?: React.CSSProperties }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={style}>
+    <circle cx="12" cy="12" r="3"></circle>
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+  </svg>
+);
+
+// Vector SVG Monkey Mascot Logo
+const MonkeyLogoSVG: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }) => (
+  <svg
+    viewBox="0 0 32 32"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+  >
+    {/* Left Ear */}
+    <circle cx="6.5" cy="15" r="4.5" fill="#f59e0b" />
+    <circle cx="6.5" cy="15" r="2.5" fill="#fde68a" />
+    {/* Right Ear */}
+    <circle cx="25.5" cy="15" r="4.5" fill="#f59e0b" />
+    <circle cx="25.5" cy="15" r="2.5" fill="#fde68a" />
+    {/* Main Head */}
+    <ellipse cx="16" cy="16" rx="10.5" ry="9.5" fill="#d97706" />
+    {/* Inner Face Mask */}
+    <path
+      d="M10 13a4.5 4.5 0 0 1 6-1 4.5 4.5 0 0 1 6 1c1.5 2 1.5 5 0 7-1.5 2-4.5 3-6 3s-4.5-1-6-3c-1.5-2-1.5-5 0-7z"
+      fill="#fef3c7"
+    />
+    {/* Eyes */}
+    <ellipse cx="12.5" cy="14" rx="1.3" ry="1.6" fill="#1e293b" />
+    <circle cx="12.9" cy="13.5" r="0.5" fill="#ffffff" />
+    <ellipse cx="19.5" cy="14" rx="1.3" ry="1.6" fill="#1e293b" />
+    <circle cx="19.9" cy="13.5" r="0.5" fill="#ffffff" />
+    {/* Snout / Muzzle */}
+    <ellipse cx="16" cy="18" rx="3.2" ry="2.2" fill="#fed7aa" />
+    {/* Nose nostrils */}
+    <circle cx="15.2" cy="17.5" r="0.5" fill="#78350f" />
+    <circle cx="16.8" cy="17.5" r="0.5" fill="#78350f" />
+    {/* Smile */}
+    <path
+      d="M14.2 19c.6.8 3 .8 3.6 0"
+      stroke="#78350f"
+      strokeWidth="1.1"
+      strokeLinecap="round"
+    />
+  </svg>
+);
 
 interface MascotIslandProps {
   user?: User | null;
   onOpenAuth: () => void;
   logout?: () => void;
   progress: UserProgress;
-  speechText: string;
-  emoji: string;
+  speechText?: string;
+  emoji?: string;
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
   lang: 'pt' | 'en';
@@ -40,13 +99,10 @@ interface MascotIslandProps {
 
 export const MascotIsland: React.FC<MascotIslandProps> = ({
   progress,
-  speechText,
-  emoji,
   theme,
   onToggleTheme,
   lang,
   onToggleLang,
-  onOpenVault,
   onOpenQuests,
   onGoHome,
   user,
@@ -78,130 +134,94 @@ export const MascotIsland: React.FC<MascotIslandProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full pointer-events-none">
-      <div className="pointer-events-auto flex items-center justify-between bg-[#ffffff]/80 dark:bg-[#000000]/80 backdrop-blur-2xl border-b border-black/[0.08] dark:border-white/[0.08] px-4 sm:px-6 py-2.5 shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.4)] transition-all">
+    <header className="sticky top-0 z-40 w-full pointer-events-none">
+      <div className="pointer-events-auto flex items-center justify-between px-4 sm:px-8 py-3 bg-white/75 dark:bg-black/65 backdrop-blur-2xl border-b border-black/[0.04] dark:border-white/[0.06] transition-all">
         
-        {/* Left: Mascot & Brand */}
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => {
-              playTone(500, 'sine', 0.04);
-              onGoHome();
-            }} 
-            className="flex items-center gap-2.5 hover:opacity-90 transition-opacity cursor-pointer group active:scale-[0.97]"
-          >
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-[14px] bg-gradient-to-tr from-amber-400 via-rose-500 to-[#0a84ff] text-xl shadow-[0_4px_12px_rgba(10,132,255,0.25)] group-hover:scale-105 transition-transform duration-300">
-              <span className="drop-shadow-sm">{emoji}</span>
-              <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#30d158] ring-2 ring-white dark:ring-black" />
-            </div>
-            <div className="text-left">
-              <div className="flex items-center gap-1.5">
-                <span className="text-[15px] font-bold tracking-tight text-slate-900 dark:text-white leading-none font-['Courier_New',Courier,monospace]">
-                  Puku
-                </span>
-                <span className="rounded-full bg-[#0a84ff]/10 dark:bg-[#0a84ff]/20 px-2 py-0.5 text-[9px] font-bold text-[#007aff] dark:text-[#0a84ff] border border-[#0a84ff]/20">
-                  PT-PT 🇵🇹
-                </span>
-              </div>
-              <p className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 truncate max-w-[130px] sm:max-w-[220px] mt-0.5">
-                {speechText || 'with Sujan ❤️'}
-              </p>
-            </div>
-          </button>
-        </div>
+        {/* Left: SVG Monkey Logo + PUKU */}
+        <button 
+          onClick={() => {
+            playTone(500, 'sine', 0.03);
+            onGoHome();
+          }} 
+          className="flex items-center gap-2.5 hover:opacity-85 transition-all cursor-pointer group active:scale-95"
+        >
+          <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-amber-500/10 dark:bg-amber-400/10 border border-amber-500/20 group-hover:scale-105 transition-transform">
+            <MonkeyLogoSVG className="w-6 h-6" />
+          </div>
+          <span className="text-sm sm:text-base font-black tracking-wider text-slate-900 dark:text-white uppercase font-['Courier_New',Courier,monospace]">
+            PUKU
+          </span>
+        </button>
 
-        {/* Right: iOS Nav Capsules (Unified Stats + Profile Menu) */}
+        {/* Right: Same SVG Hearts, Coins, Gems as 3D Outfit Panel + Settings */}
         <div className="flex items-center gap-2 sm:gap-3">
           
-          {/* 1. Unified Game Stats Capsule (Hearts, Coins, Gems) */}
+          {/* Stats Glass Capsule: Hearts, Coins, Gems */}
           <button
             onClick={() => {
-              playTone(550, 'sine', 0.04);
+              playTone(550, 'sine', 0.03);
               triggerHaptic('light');
               onOpenQuests();
             }}
-            className="flex items-center gap-2 sm:gap-2.5 px-3.5 py-1.5 rounded-[14px] bg-black/[0.04] dark:bg-[#1c1c1e] hover:bg-black/[0.08] dark:hover:bg-[#2c2c2e] border border-black/[0.06] dark:border-white/[0.08] text-xs font-bold transition-all cursor-pointer group active:scale-95 shadow-xs"
-            title="Daily Quests, Hearts & Rewards"
+            className="flex items-center gap-2.5 sm:gap-3 px-3.5 py-1.5 rounded-full bg-black/[0.04] dark:bg-white/[0.07] hover:bg-black/[0.08] dark:hover:bg-white/[0.12] border border-black/[0.04] dark:border-white/[0.08] text-xs font-bold transition-all cursor-pointer active:scale-95 font-['Courier_New',Courier,monospace]"
+            title="Quests, Hearts, Coins & Gems"
           >
-            {/* Hearts */}
-            <span className="flex items-center gap-1 text-[#ff375f] dark:text-[#ff375f]">
-              <Heart className="w-3.5 h-3.5 fill-[#ff375f] text-[#ff375f]" />
-              <span>{progress.hearts}</span>
+            {/* SVG Heart */}
+            <span className="flex items-center gap-1.5 text-[#ff375f]">
+              <SvgHeart size={15} style={{ color: '#ff375f' }} />
+              <span>{progress?.hearts ?? 5}</span>
             </span>
 
-            <span className="h-3 w-px bg-black/[0.1] dark:bg-white/[0.12]" />
+            <span className="h-3 w-px bg-black/10 dark:bg-white/15" />
 
-            {/* Coins */}
-            <span className="flex items-center gap-1 text-[#ff9f0a] dark:text-[#ffd60a]">
-              <Coins className="w-3.5 h-3.5 text-[#ff9f0a] dark:text-[#ffd60a]" />
-              <span>{progress.coins}</span>
+            {/* SVG Coin */}
+            <span className="flex items-center gap-1.5 text-[#ffd60a]">
+              <SvgCoin size={15} style={{ color: '#ffd60a' }} />
+              <span>{progress?.coins ?? 0}</span>
             </span>
 
-            {/* Gems */}
-            <span className="hidden sm:inline-flex items-center gap-1 text-[#bf5af2] dark:text-[#bf5af2]">
-              <span className="h-3 w-px bg-black/[0.1] dark:bg-white/[0.12] mr-1.5" />
-              <Gem className="w-3.5 h-3.5 text-[#bf5af2]" />
-              <span>{progress.gems}</span>
+            <span className="h-3 w-px bg-black/10 dark:bg-white/15" />
+
+            {/* SVG Gem */}
+            <span className="flex items-center gap-1.5 text-[#bf5af2]">
+              <SvgGem size={15} style={{ color: '#bf5af2' }} />
+              <span>{progress?.gems ?? 0}</span>
             </span>
           </button>
 
-          {/* 2. Unified Settings & Account Menu Popover */}
+          {/* Settings Trigger */}
           <div className="relative" ref={menuRef}>
             <button
               onClick={toggleMenu}
-              className={`flex h-9 items-center gap-1.5 px-3 rounded-[14px] border transition-all cursor-pointer active:scale-95 ${
+              className={`flex h-8 w-8 items-center justify-center rounded-full transition-all cursor-pointer active:scale-95 ${
                 isMenuOpen
-                  ? 'bg-[#0a84ff] text-white border-transparent shadow-[0_4px_14px_rgba(10,132,255,0.4)]'
-                  : 'bg-black/[0.04] dark:bg-[#1c1c1e] text-slate-700 dark:text-zinc-200 border-black/[0.06] dark:border-white/[0.08] hover:bg-black/[0.08] dark:hover:bg-[#2c2c2e]'
+                  ? 'bg-black text-white dark:bg-white dark:text-black'
+                  : 'bg-black/[0.04] dark:bg-white/[0.07] text-slate-700 dark:text-zinc-300 hover:bg-black/[0.08] dark:hover:bg-white/[0.12] border border-black/[0.04] dark:border-white/[0.08]'
               }`}
-              title="Account & App Settings"
+              title="Settings & Account"
             >
-              {user ? (
-                <div className="flex items-center gap-1.5">
-                  {user.photoURL ? (
-                    <img src={user.photoURL} alt="avatar" className="w-5 h-5 rounded-full object-cover ring-1 ring-[#0a84ff]" />
-                  ) : (
-                    <div className="w-5 h-5 rounded-full bg-[#0a84ff] text-white flex items-center justify-center text-[10px] font-black">
-                      {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'A'}
-                    </div>
-                  )}
-                  <span className="hidden md:inline text-xs font-bold max-w-[80px] truncate">
-                    {user.displayName || 'Amisha'}
-                  </span>
-                </div>
+              {user?.photoURL ? (
+                <img src={user.photoURL} alt="avatar" className="w-6 h-6 rounded-full object-cover" />
               ) : (
-                <div className="flex items-center gap-1.5">
-                  <Settings className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline text-xs font-bold">Menu</span>
-                </div>
+                <SvgSettings size={15} />
               )}
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isMenuOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {/* Popover Dropdown Menu */}
             {isMenuOpen && (
-              <div className="absolute right-0 mt-2 w-72 rounded-[20px] bg-white/90 dark:bg-[#1c1c1e]/90 backdrop-blur-2xl border border-black/[0.08] dark:border-white/[0.1] p-3.5 shadow-[0_20px_50px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)] ios-modal-scale-in z-50">
+              <div className="absolute right-0 mt-2.5 w-64 rounded-2xl bg-white/95 dark:bg-[#1c1c1e]/95 backdrop-blur-2xl border border-black/[0.06] dark:border-white/[0.1] p-3 shadow-[0_16px_40px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.7)] ios-modal-scale-in z-50 font-['Courier_New',Courier,monospace]">
                 
-                {/* Account / User Header */}
-                <div className="p-3 mb-2.5 rounded-[16px] bg-black/[0.03] dark:bg-[#2c2c2e]/60 border border-black/[0.04] dark:border-white/[0.06]">
+                {/* Account / User Section */}
+                <div className="p-2.5 mb-2 rounded-xl bg-black/[0.03] dark:bg-[#2c2c2e]/60 border border-black/[0.04] dark:border-white/[0.06]">
                   {user ? (
                     <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        {user.photoURL ? (
-                          <img src={user.photoURL} alt="avatar" className="w-8 h-8 rounded-full object-cover shrink-0 ring-2 ring-[#0a84ff]" />
-                        ) : (
-                          <div className="w-8 h-8 rounded-full bg-[#0a84ff] text-white flex items-center justify-center text-xs font-black shrink-0">
-                            {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'A'}
-                          </div>
-                        )}
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                            {user.displayName || 'Amisha'}
-                          </p>
-                          <p className="text-[10px] font-semibold text-[#30d158] dark:text-[#30d158] flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#30d158]" /> Cloud Synced
-                          </p>
-                        </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                          {user.displayName || 'Learner'}
+                        </p>
+                        <p className="text-[10px] text-[#30d158] font-semibold">
+                          Cloud Synced
+                        </p>
                       </div>
 
                       {logout && (
@@ -210,7 +230,7 @@ export const MascotIsland: React.FC<MascotIslandProps> = ({
                             setIsMenuOpen(false);
                             logout();
                           }}
-                          className="p-2 rounded-[12px] text-[#ff453a] hover:bg-[#ff453a]/10 transition-colors cursor-pointer active:scale-95"
+                          className="p-1.5 rounded-lg text-[#ff453a] hover:bg-[#ff453a]/10 transition-colors cursor-pointer"
                           title="Sign Out"
                         >
                           <LogOut className="w-4 h-4" />
@@ -219,20 +239,15 @@ export const MascotIsland: React.FC<MascotIslandProps> = ({
                     </div>
                   ) : (
                     <div className="flex items-center justify-between gap-2">
-                      <div>
-                        <p className="text-xs font-bold text-slate-900 dark:text-white">
-                          Guest Learner
-                        </p>
-                        <p className="text-[10px] text-slate-500 dark:text-zinc-400">
-                          Sign in to sync streaks & XP
-                        </p>
-                      </div>
+                      <p className="text-xs font-bold text-slate-700 dark:text-zinc-300">
+                        Guest Mode
+                      </p>
                       <button
                         onClick={() => {
                           setIsMenuOpen(false);
                           onOpenAuth();
                         }}
-                        className="px-3 py-1.5 rounded-[12px] bg-[#0a84ff] hover:bg-[#007aff] text-white text-[11px] font-bold transition-all cursor-pointer shadow-[0_2px_8px_rgba(10,132,255,0.4)] active:scale-95"
+                        className="px-2.5 py-1 rounded-lg bg-[#0a84ff] hover:bg-[#007aff] text-white text-[10px] font-bold transition-all cursor-pointer active:scale-95"
                       >
                         Sign In
                       </button>
@@ -240,80 +255,49 @@ export const MascotIsland: React.FC<MascotIslandProps> = ({
                   )}
                 </div>
 
-                {/* Quick Toggle Rows */}
-                <div className="space-y-1.5">
+                {/* Quick Preferences */}
+                <div className="space-y-1 text-xs">
                   
                   {/* Theme Switcher */}
-                  <div className="flex items-center justify-between p-2 rounded-[14px] hover:bg-black/[0.04] dark:hover:bg-white/[0.05] transition-colors">
-                    <div className="flex items-center gap-2.5">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-[10px] bg-[#ffd60a]/15 text-[#ff9f0a] dark:text-[#ffd60a]">
-                        {theme === 'dark' ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
-                      </div>
-                      <span className="text-xs font-semibold text-slate-700 dark:text-zinc-200">
-                        {theme === 'dark' ? 'Night OLED' : 'Day Theme'}
-                      </span>
+                  <div className="flex items-center justify-between p-2 rounded-xl hover:bg-black/[0.03] dark:hover:bg-white/[0.05] transition-colors">
+                    <div className="flex items-center gap-2">
+                      {theme === 'dark' ? <Moon className="w-3.5 h-3.5 text-zinc-400" /> : <Sun className="w-3.5 h-3.5 text-amber-500" />}
+                      <span className="font-bold text-slate-700 dark:text-zinc-300">Theme</span>
                     </div>
                     <button
-                      onClick={onToggleTheme}
-                      className="px-2.5 py-1 rounded-[10px] bg-black/[0.05] dark:bg-[#2c2c2e] text-[11px] font-bold text-slate-700 dark:text-zinc-200 hover:bg-[#0a84ff] hover:text-white transition-all cursor-pointer active:scale-95"
+                      onClick={() => {
+                        triggerHaptic('light');
+                        onToggleTheme();
+                      }}
+                      className="px-2 py-0.5 rounded-lg bg-black/[0.05] dark:bg-white/[0.1] text-[10px] font-bold text-slate-700 dark:text-zinc-300"
                     >
-                      {theme === 'dark' ? '🌙 Dark' : '☀️ Light'}
+                      {theme === 'dark' ? 'Dark' : 'Light'}
                     </button>
                   </div>
 
-                  {/* Language Toggle */}
-                  <div className="flex items-center justify-between p-2 rounded-[14px] hover:bg-black/[0.04] dark:hover:bg-white/[0.05] transition-colors">
-                    <div className="flex items-center gap-2.5">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-[10px] bg-[#0a84ff]/15 text-[#0a84ff]">
-                        <Globe className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="text-xs font-semibold text-slate-700 dark:text-zinc-200">
-                        UI Language
-                      </span>
+                  {/* Language Switcher */}
+                  <div className="flex items-center justify-between p-2 rounded-xl hover:bg-black/[0.03] dark:hover:bg-white/[0.05] transition-colors">
+                    <div className="flex items-center gap-2">
+                      <Globe className="w-3.5 h-3.5 text-blue-500" />
+                      <span className="font-bold text-slate-700 dark:text-zinc-300">UI Lang</span>
                     </div>
                     <button
-                      onClick={onToggleLang}
-                      className="px-2.5 py-1 rounded-[10px] bg-black/[0.05] dark:bg-[#2c2c2e] text-[11px] font-bold text-[#0a84ff] hover:bg-[#0a84ff] hover:text-white transition-all cursor-pointer active:scale-95"
+                      onClick={() => {
+                        triggerHaptic('light');
+                        onToggleLang();
+                      }}
+                      className="px-2 py-0.5 rounded-lg bg-black/[0.05] dark:bg-white/[0.1] text-[10px] font-bold text-slate-700 dark:text-zinc-300"
                     >
-                      {lang === 'pt' ? '🇵🇹 Português' : '🇬🇧 English'}
+                      {lang === 'pt' ? 'PT' : 'EN'}
                     </button>
                   </div>
+
                 </div>
 
-                {/* Navigation Shortlinks */}
-                <div className="mt-3 pt-2.5 border-t border-black/[0.06] dark:border-white/[0.08] grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      onOpenQuests();
-                    }}
-                    className="flex items-center justify-center gap-1.5 p-2 rounded-[12px] bg-[#ff9f0a]/10 text-[#ff9f0a] dark:text-[#ffd60a] text-xs font-bold hover:bg-[#ff9f0a]/20 transition-colors cursor-pointer active:scale-95"
-                  >
-                    <Flame className="w-3.5 h-3.5" />
-                    <span>Daily Quests</span>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      onOpenVault();
-                    }}
-                    className="flex items-center justify-center gap-1.5 p-2 rounded-[12px] bg-[#bf5af2]/10 text-[#bf5af2] text-xs font-bold hover:bg-[#bf5af2]/20 transition-colors cursor-pointer active:scale-95"
-                  >
-                    <Activity className="w-3.5 h-3.5 text-[#bf5af2]" />
-                    <span>Activity Rings</span>
-                  </button>
-                </div>
-
-                <button
-                  onClick={() => setIsMenuOpen(false)}
-                  className="w-full mt-2.5 py-1.5 text-center text-[11px] font-semibold text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 transition-colors cursor-pointer"
-                >
-                  Close Menu
-                </button>
               </div>
             )}
           </div>
+
         </div>
 
       </div>

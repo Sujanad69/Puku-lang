@@ -85,33 +85,20 @@ export const Full3DWardrobe: React.FC<Full3DWardrobeProps> = ({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const viewerRef = useRef<any>(null);
 
-  const [modelUrls, setModelUrls] = useState<Record<string, string>>({});
-  const blobUrlsRef = useRef<string[]>([]);
-
   useEffect(() => {
     if (viewerRef.current) {
       viewerRef.current.setAttribute('loading', 'eager');
-    }
-    
-    // Preload all models into Blob URLs for instant rendering with zero network latency
-    OUTFITS_DATA.forEach(async (outfit) => {
-      try {
-        const response = await fetch(outfit.url, { mode: 'cors' });
-        const blob = await response.blob();
-        const objectUrl = URL.createObjectURL(blob);
-        blobUrlsRef.current.push(objectUrl);
-        setModelUrls(prev => ({ ...prev, [outfit.id]: objectUrl }));
-      } catch (e) {
-        setModelUrls(prev => ({ ...prev, [outfit.id]: outfit.url }));
+      viewerRef.current.setAttribute('power-preference', 'high-performance');
+      // If model has animation, ensure it plays at full 60fps smoothly
+      if (viewerRef.current.play) {
+        try {
+          viewerRef.current.play({ repetitions: Infinity });
+        } catch {
+          // Ignored
+        }
       }
-    });
-    
-    return () => {
-      blobUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
-    };
-  }, []);
-
-  const activeSrc = modelUrls[selectedOutfit.id] || selectedOutfit.url;
+    }
+  }, [selectedOutfit]);
 
   const isOwned = (id: string) => progress.purchasedOutfits.includes(id);
   const currentlyOwned = isOwned(selectedOutfit.id);
@@ -257,11 +244,14 @@ export const Full3DWardrobe: React.FC<Full3DWardrobeProps> = ({
         <model-viewer
           ref={viewerRef}
           id="fs-avatar-viewer"
-          src={activeSrc}
+          src={selectedOutfit.url}
           camera-controls
           autoplay
           seamless-poster
           loading="eager"
+          power-preference="high-performance"
+          interpolation-decay="100"
+          animation-crossfade-duration="300"
           camera-target="0m 1.05m 0m"
           camera-orbit="0deg 85deg 4.2m"
           field-of-view="25deg"
@@ -269,9 +259,19 @@ export const Full3DWardrobe: React.FC<Full3DWardrobeProps> = ({
           max-field-of-view="45deg"
           environment-image="https://sujanad69.github.io/Pukumodel/studio_small_08_2k.hdr"
           exposure="1.0"
-          shadow-intensity="1.6"
-          shadow-softness="0.9"
-          style={{ width: '100%', height: '100%', outline: 'none', position: 'absolute', top: 0, left: 0, zIndex: 10 }}
+          shadow-intensity="0.8"
+          shadow-softness="0.5"
+          style={{ 
+            width: '100%', 
+            height: '100%', 
+            outline: 'none', 
+            position: 'absolute', 
+            top: 0, 
+            left: 0, 
+            zIndex: 10,
+            transform: 'translateZ(0)',
+            willChange: 'transform'
+          }}
         >
         </model-viewer>
       </div>

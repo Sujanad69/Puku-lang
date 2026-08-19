@@ -11,8 +11,19 @@ import {
   Flame, 
   Compass, 
   Award,
-  Smile
+  Smile,
+  Music,
+  Target,
+  Rocket
 } from 'lucide-react';
+import { 
+  FlagPortugal, 
+  PukuMonkeyIcon, 
+  BananaIcon, 
+  PremiumTrophy, 
+  SparkleStarIcon, 
+  LoveHeartIcon 
+} from './icons/PremiumIcons';
 
 interface OnboardingModalProps {
   onComplete: (preferences?: { nickname: string; dailyGoalXP: number }) => void;
@@ -28,48 +39,48 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete, la
   const steps = [
     {
       id: 'welcome',
-      tag: '🇵🇹 Made with Love',
-      title: 'Bem-vinda, Amisha! ❤️',
+      tag: 'Made with Love',
+      title: 'Bem-vinda, Amisha!',
       subtitle: 'European Portuguese made sweet, simple, and romantic by Sujan.',
       accentColor: 'from-rose-500 to-pink-600',
       badgeBg: 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900',
-      emoji: '🐒'
+      icon: <PukuMonkeyIcon size={46} />
     },
     {
       id: 'method',
-      tag: '👶 The Kid-Style Method',
+      tag: 'The Natural Method',
       title: 'Learn by Sound & Emotion',
       subtitle: 'No stressful grammar rules! Hear native sounds, see visual cues, and speak with confidence.',
       accentColor: 'from-blue-600 to-indigo-600',
       badgeBg: 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900',
-      emoji: '🎵'
+      icon: <Music className="w-10 h-10 text-white" />
     },
     {
       id: 'mascot',
-      tag: '🐒 Your Mascot Companion',
+      tag: 'Your Mascot Companion',
       title: 'Meet Puku & Love Notes',
       subtitle: 'Feed Puku bananas, unlock custom outfits, and discover secret love letters from Sujan along the way.',
       accentColor: 'from-amber-500 to-orange-500',
       badgeBg: 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-900',
-      emoji: '🍌'
+      icon: <BananaIcon size={46} />
     },
     {
       id: 'goals',
-      tag: '🎯 Personalize Journey',
+      tag: 'Personalize Journey',
       title: 'Set Your Learning Rhythm',
       subtitle: 'Choose your daily goal and how you like to be cheered on.',
       accentColor: 'from-emerald-500 to-teal-600',
       badgeBg: 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900',
-      emoji: '✨'
+      icon: <Target className="w-10 h-10 text-white" />
     },
     {
       id: 'ready',
-      tag: '🚀 Lisbon Awaits',
+      tag: 'Lisbon Awaits',
       title: 'Pronta para Lisboa!',
       subtitle: 'You are all set to start your first lesson. Sujan is so proud of you!',
       accentColor: 'from-violet-600 to-purple-600',
       badgeBg: 'bg-violet-50 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-900',
-      emoji: '🎉'
+      icon: <Rocket className="w-10 h-10 text-white" />
     }
   ];
 
@@ -154,9 +165,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete, la
             </button>
           </div>
 
-          {/* Big Mascot / Hero Emoji */}
-          <div className="mx-auto my-2 flex h-20 w-20 items-center justify-center rounded-3xl bg-white/20 text-4xl shadow-xl backdrop-blur-md border border-white/30 transform hover:scale-105 transition-transform">
-            {current.emoji}
+          {/* Big Mascot / Hero Vector Icon */}
+          <div className="mx-auto my-2 flex h-20 w-20 items-center justify-center rounded-3xl bg-white/20 shadow-xl backdrop-blur-md border border-white/30 transform hover:scale-105 transition-transform">
+            {current.icon}
           </div>
 
           <div className="inline-block rounded-full bg-white/20 px-3 py-0.5 text-[10px] font-extrabold uppercase tracking-wider backdrop-blur-md mb-1.5 border border-white/20">

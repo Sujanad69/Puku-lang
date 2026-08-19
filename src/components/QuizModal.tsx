@@ -103,34 +103,48 @@ export const QuizModal: React.FC<QuizModalProps> = ({
       return;
     }
     
-    setIsListening(true);
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'pt-PT';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-    
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      setVoiceResult(transcript);
-      setIsListening(false);
+    try {
+      setIsListening(true);
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'pt-PT';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
       
-      const normalizedSpoken = transcript.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, '');
-      const normalizedTarget = currentWord.pt.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, '');
+      recognition.onresult = (event: any) => {
+        try {
+          const transcript = event.results[0][0].transcript;
+          setVoiceResult(transcript);
+          setIsListening(false);
+          
+          const normalizedSpoken = transcript.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, '');
+          const normalizedTarget = currentWord.pt.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, '');
+          
+          const isMatch = normalizedSpoken === normalizedTarget || normalizedSpoken.includes(normalizedTarget);
+          checkAnswer(isMatch);
+        } catch {
+          setIsListening(false);
+        }
+      };
       
-      const isMatch = normalizedSpoken === normalizedTarget || normalizedSpoken.includes(normalizedTarget);
-      checkAnswer(isMatch);
-    };
-    
-    recognition.onerror = () => {
+      recognition.onerror = (e: any) => {
+        console.warn('Voice recognition error:', e);
+        setIsListening(false);
+        // Switch to MCQ if audio device / microphone is not working
+        setQuestionModes(prev => prev.map((m, i) => i === currentIndex ? 'mcq' : m));
+      };
+      
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+      
+      recognition.start();
+    } catch (err) {
+      console.warn('Failed to start speech recognition audio device:', err);
       setIsListening(false);
-    };
-    
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-    
-    recognition.start();
+      // Fallback seamlessly to multiple choice mode
+      setQuestionModes(prev => prev.map((m, i) => i === currentIndex ? 'mcq' : m));
+    }
   };
 
   const handleSelectOption = (opt: string) => {
@@ -251,33 +265,40 @@ export const QuizModal: React.FC<QuizModalProps> = ({
             <div className="absolute -bottom-10 -left-10 w-44 h-44 bg-white rounded-full blur-2xl"></div>
           </div>
 
-          {/* Close Button */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 h-9 w-9 rounded-full bg-black/20 hover:bg-black/30 flex items-center justify-center text-white transition-colors cursor-pointer backdrop-blur-md"
-            title="Close Quiz"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          {/* Top Actions Bar (No overlap on mobile) */}
+          <div className="relative z-10 flex items-center justify-between gap-2 mb-3">
+            <div className="flex-1" />
 
-          {/* Pill Badge */}
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3.5 py-1 text-[11px] font-extrabold uppercase tracking-wider backdrop-blur-md border border-white/20 mb-2 shadow-xs">
-            {isLoveUnit ? (
-              <>
-                <Heart className="w-3.5 h-3.5 text-rose-200 fill-current" />
-                <span>Love Phrases Quiz • Sujan & Amisha</span>
-              </>
-            ) : isWeakWordsMode ? (
-              <>
-                <HelpCircle className="w-3.5 h-3.5 text-amber-200" />
-                <span>Weak Words Master Review</span>
-              </>
-            ) : (
-              <>
-                <Layers className="w-3.5 h-3.5 text-blue-200" />
-                <span>Unit Quiz • {unitTitle}</span>
-              </>
-            )}
+            {/* Pill Badge */}
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider backdrop-blur-md border border-white/20 shadow-xs max-w-[200px] sm:max-w-none truncate">
+              {isLoveUnit ? (
+                <>
+                  <Heart className="w-3.5 h-3.5 text-rose-200 fill-current shrink-0" />
+                  <span className="truncate">Love Quiz • Sujan & Amisha</span>
+                </>
+              ) : isWeakWordsMode ? (
+                <>
+                  <HelpCircle className="w-3.5 h-3.5 text-amber-200 shrink-0" />
+                  <span className="truncate">Weak Words Workout</span>
+                </>
+              ) : (
+                <>
+                  <Layers className="w-3.5 h-3.5 text-blue-200 shrink-0" />
+                  <span className="truncate">{unitTitle} Quiz</span>
+                </>
+              )}
+            </div>
+
+            {/* Close Button */}
+            <div className="flex-1 flex justify-end">
+              <button
+                onClick={onClose}
+                className="h-8 w-8 rounded-full bg-black/20 hover:bg-black/30 flex items-center justify-center text-white transition-colors cursor-pointer backdrop-blur-md shrink-0"
+                title="Close Quiz"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">

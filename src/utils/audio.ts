@@ -1,44 +1,95 @@
-const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+// Safe, lazy AudioContext handling to prevent "Failed to start the audio device" errors
+let audioCtxInstance: AudioContext | null = null;
+
+const getAudioContext = (): AudioContext | null => {
+  try {
+    if (typeof window === 'undefined') return null;
+    if (!audioCtxInstance) {
+      const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioCtxClass) {
+        audioCtxInstance = new AudioCtxClass();
+      }
+    }
+    if (audioCtxInstance && audioCtxInstance.state === 'suspended') {
+      audioCtxInstance.resume().catch(() => {
+        // Ignored if user interaction is pending or audio device is locked
+      });
+    }
+    return audioCtxInstance;
+  } catch (err) {
+    console.warn('Audio device unavailable:', err);
+    return null;
+  }
+};
 
 export const playTone = (freq: number, type: OscillatorType, duration: number, vol = 0.1) => {
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = type;
-  osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-  gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start();
-  osc.stop(audioCtx.currentTime + duration);
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + duration);
+  } catch (err) {
+    // Graceful fallback if audio device is unavailable
+    console.warn('Could not play tone:', err);
+  }
 };
 
 export const speakPt = (text: string, slowMode: boolean = false) => {
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'pt-PT';
-    utterance.rate = slowMode ? 0.6 : 0.85;
-    window.speechSynthesis.speak(utterance);
+  try {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'pt-PT';
+      utterance.rate = slowMode ? 0.6 : 0.85;
+      utterance.onerror = (e) => {
+        console.warn('Speech synthesis error:', e);
+      };
+      window.speechSynthesis.speak(utterance);
+    }
+  } catch (err) {
+    console.warn('Speech synthesis failed:', err);
   }
 };
 
 export const playSuccessSound = () => {
-  playTone(440, 'sine', 0.1);
-  setTimeout(() => playTone(660, 'sine', 0.2), 100);
+  try {
+    playTone(440, 'sine', 0.1);
+    setTimeout(() => playTone(660, 'sine', 0.2), 100);
+  } catch {
+    // Ignored
+  }
 };
 
 export const playErrorSound = () => {
-  playTone(330, 'square', 0.1);
-  setTimeout(() => playTone(220, 'square', 0.2), 100);
+  try {
+    playTone(330, 'square', 0.1);
+    setTimeout(() => playTone(220, 'square', 0.2), 100);
+  } catch {
+    // Ignored
+  }
 };
 
 export const speakEn = (text: string) => {
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
-    window.speechSynthesis.speak(utterance);
+  try {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.onerror = (e) => {
+        console.warn('Speech synthesis error:', e);
+      };
+      window.speechSynthesis.speak(utterance);
+    }
+  } catch (err) {
+    console.warn('Speech synthesis failed:', err);
   }
 };

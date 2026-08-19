@@ -108,5 +108,14 @@ export const OUTFITS_DATA: OutfitItem[] = [
     thumb: 'https://sujanad69.github.io/Pukumodel/11-Experimental%20Samurai.WEBP',
     url: 'https://sujanad69.github.io/Pukumodel/model%2011.glb',
     description: 'Ultimate legendary outfit: Custom samurai ronin battle suit unlocked with 25 Gems!'
+  },
+  {
+    id: 'm12',
+    name: 'Amisha Special',
+    cost: 100,
+    currency: 'gem',
+    thumb: 'https://raw.githubusercontent.com/Sujanad69/Pukumodel/main/sujangirl.webp',
+    url: 'https://raw.githubusercontent.com/Sujanad69/Pukumodel/main/sujangirl.glb',
+    description: 'Exclusive Amisha Special outfit! Costs 100 gems.'
   }
 ];

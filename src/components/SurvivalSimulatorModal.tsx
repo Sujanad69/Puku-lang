@@ -156,36 +156,43 @@ export const SurvivalSimulatorModal: React.FC<SurvivalSimulatorModalProps> = ({
             <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-orange-300 rounded-full blur-2xl"></div>
           </div>
 
-          {/* Close / Back Button */}
-          <button
-            onClick={selectedScenario ? () => setSelectedScenario(null) : onClose}
-            className="absolute top-4 right-4 h-9 w-9 rounded-full bg-black/20 hover:bg-black/30 flex items-center justify-center text-white transition-colors cursor-pointer backdrop-blur-md"
-            title={selectedScenario ? "Back to Missions" : "Close"}
-          >
-            <X className="w-5 h-5" />
-          </button>
+          {/* Top Actions Bar (No overlap on mobile) */}
+          <div className="relative z-10 flex items-center justify-between gap-2 mb-3">
+            {/* Speed Toggle */}
+            <div className="flex-1 flex justify-start">
+              <button
+                onClick={() => {
+                  triggerHaptic('light');
+                  setSlowAudio(!slowAudio);
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all backdrop-blur-md border cursor-pointer ${
+                  slowAudio
+                    ? 'bg-amber-300 text-amber-950 border-amber-200 shadow-xs'
+                    : 'bg-black/20 text-white/90 border-white/15 hover:bg-black/30'
+                }`}
+                title="Toggle audio speed"
+              >
+                <span>🐢</span>
+                <span>{slowAudio ? '0.75x' : '1.0x'}</span>
+              </button>
+            </div>
 
-          {/* Speed Toggle */}
-          <button
-            onClick={() => {
-              triggerHaptic('light');
-              setSlowAudio(!slowAudio);
-            }}
-            className={`absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all backdrop-blur-md border cursor-pointer ${
-              slowAudio
-                ? 'bg-amber-300 text-amber-950 border-amber-200 shadow-xs'
-                : 'bg-black/20 text-white/90 border-white/15 hover:bg-black/30'
-            }`}
-            title="Toggle audio speed"
-          >
-            <span>🐢</span>
-            <span>{slowAudio ? '0.75x' : '1.0x'}</span>
-          </button>
+            {/* Pill Badge */}
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider backdrop-blur-md border border-white/20 shadow-xs max-w-[180px] sm:max-w-none truncate">
+              <Compass className="w-3.5 h-3.5 text-amber-200 shrink-0" />
+              <span className="truncate">Lisbon Survival Simulator</span>
+            </div>
 
-          {/* Pill Badge */}
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3.5 py-1 text-[11px] font-extrabold uppercase tracking-wider backdrop-blur-md border border-white/20 mb-2 shadow-xs">
-            <Compass className="w-3.5 h-3.5 text-amber-200" />
-            <span>Real-Life Lisbon Survival Simulator</span>
+            {/* Close / Back Button */}
+            <div className="flex-1 flex justify-end">
+              <button
+                onClick={selectedScenario ? () => setSelectedScenario(null) : onClose}
+                className="h-8 w-8 rounded-full bg-black/20 hover:bg-black/30 flex items-center justify-center text-white transition-colors cursor-pointer backdrop-blur-md shrink-0"
+                title={selectedScenario ? "Back to Missions" : "Close"}
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
