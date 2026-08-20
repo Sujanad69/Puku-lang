@@ -6,8 +6,10 @@ import {
   Sun, 
   Moon, 
   Globe, 
+  Mic,
+  Volume2
 } from 'lucide-react';
-import { playTone } from '../utils/audio';
+import { playTone, subscribeAudioState, AudioPlaybackState } from '../utils/audio';
 import { triggerHaptic } from '../utils/haptics';
 
 // Crisp Apple HIG Minimal Vector Icons (Exact same as 3D Outfit panel)
@@ -94,6 +96,7 @@ interface MascotIslandProps {
   onToggleLang: () => void;
   onOpenVault: () => void;
   onOpenQuests: () => void;
+  onOpenVoiceSettings: () => void;
   onGoHome: () => void;
 }
 
@@ -104,13 +107,27 @@ export const MascotIsland: React.FC<MascotIslandProps> = ({
   lang,
   onToggleLang,
   onOpenQuests,
+  onOpenVoiceSettings,
   onGoHome,
   user,
   onOpenAuth,
   logout
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [playback, setPlayback] = useState<AudioPlaybackState>({
+    isPlaying: false,
+    text: '',
+    lang: 'pt-PT',
+    rate: 0.85,
+  });
   const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const unsub = subscribeAudioState((state) => {
+      setPlayback(state);
+    });
+    return () => unsub();
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -137,21 +154,39 @@ export const MascotIsland: React.FC<MascotIslandProps> = ({
     <header className="sticky top-0 z-40 w-full pointer-events-none">
       <div className="pointer-events-auto flex items-center justify-between px-4 sm:px-8 py-3 bg-white/75 dark:bg-black/65 backdrop-blur-2xl border-b border-black/[0.04] dark:border-white/[0.06] transition-all">
         
-        {/* Left: SVG Monkey Logo + PUKU */}
-        <button 
-          onClick={() => {
-            playTone(500, 'sine', 0.03);
-            onGoHome();
-          }} 
-          className="flex items-center gap-2.5 hover:opacity-85 transition-all cursor-pointer group active:scale-95"
-        >
-          <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-amber-500/10 dark:bg-amber-400/10 border border-amber-500/20 group-hover:scale-105 transition-transform">
-            <MonkeyLogoSVG className="w-6 h-6" />
-          </div>
-          <span className="text-sm sm:text-base font-black tracking-wider text-slate-900 dark:text-white uppercase font-['Courier_New',Courier,monospace]">
-            PUKU
-          </span>
-        </button>
+        {/* Left: SVG Monkey Logo + PUKU + Audio Equalizer */}
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => {
+              playTone(500, 'sine', 0.03);
+              onGoHome();
+            }} 
+            className="flex items-center gap-2.5 hover:opacity-85 transition-all cursor-pointer group active:scale-95"
+          >
+            <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-amber-500/10 dark:bg-amber-400/10 border border-amber-500/20 group-hover:scale-105 transition-transform">
+              <MonkeyLogoSVG className="w-6 h-6" />
+            </div>
+            <span className="text-sm sm:text-base font-black tracking-wider text-slate-900 dark:text-white uppercase font-['Courier_New',Courier,monospace]">
+              PUKU
+            </span>
+          </button>
+
+          {/* Active Audio Waveform Indicator */}
+          {playback.isPlaying && (
+            <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-600 dark:text-blue-400 animate-pulse">
+              <Volume2 className="w-3.5 h-3.5" />
+              <div className="flex items-center gap-0.5 h-3">
+                {[1, 2, 3, 4].map(b => (
+                  <span 
+                    key={b} 
+                    className="w-0.5 bg-blue-500 rounded-full animate-bounce"
+                    style={{ height: `${(b * 3) % 10 + 3}px`, animationDelay: `${b * 100}ms` }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Right: Same SVG Hearts, Coins, Gems as 3D Outfit Panel + Settings */}
         <div className="flex items-center gap-2 sm:gap-3">
@@ -291,6 +326,25 @@ export const MascotIsland: React.FC<MascotIslandProps> = ({
                       {lang === 'pt' ? 'PT' : 'EN'}
                     </button>
                   </div>
+
+                  {/* AI Voice & Audio Customization */}
+                  <button
+                    onClick={() => {
+                      playTone(550, 'sine', 0.04);
+                      triggerHaptic('light');
+                      setIsMenuOpen(false);
+                      onOpenVoiceSettings();
+                    }}
+                    className="w-full flex items-center justify-between p-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/15 text-blue-600 dark:text-blue-400 transition-colors cursor-pointer text-left border border-blue-500/20"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Mic className="w-3.5 h-3.5" />
+                      <span className="font-bold">AI Voice & Audio</span>
+                    </div>
+                    <span className="text-[10px] font-extrabold px-1.5 py-0.5 bg-blue-500 text-white rounded-md">
+                      pt-PT
+                    </span>
+                  </button>
 
                 </div>
 

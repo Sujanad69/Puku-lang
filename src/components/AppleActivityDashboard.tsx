@@ -75,8 +75,13 @@ export const AppleActivityDashboard: React.FC<AppleActivityDashboardProps> = ({
     for (let i = daysCount - 1; i >= 0; i--) {
       const d = new Date(baseDate);
       d.setDate(d.getDate() - i);
-      const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
-      const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      
+      const nepalOptions: Intl.DateTimeFormatOptions = { timeZone: 'Asia/Kathmandu' };
+      const dayName = new Intl.DateTimeFormat('en-US', { ...nepalOptions, weekday: 'short' }).format(d);
+      const dateStr = new Intl.DateTimeFormat('en-US', { ...nepalOptions, month: 'short', day: 'numeric' }).format(d);
+      
+      // Compute full date string in Nepal time for reference
+      const nptDateFull = new Intl.DateTimeFormat('en-CA', nepalOptions).format(d);
       
       const isToday = i === 0;
       
@@ -101,7 +106,7 @@ export const AppleActivityDashboard: React.FC<AppleActivityDashboardProps> = ({
       data.push({
         date: dateStr,
         day: dayName,
-        fullDate: d.toISOString().split('T')[0],
+        fullDate: nptDateFull,
         dailyXP: dailyXp,
         cumulativeXP: isToday ? currentXP : runningCumulative,
         retention: dayRetention,

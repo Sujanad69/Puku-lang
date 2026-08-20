@@ -7,18 +7,32 @@ import { Volume2, Sparkles, Calendar } from 'lucide-react';
 export const WordOfTheDayCard: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // Strictly ONE single word for today based on calendar date
+  // Strictly ONE single word for today based on calendar date in Nepal (NPT)
   const { todayWord, dateString } = useMemo(() => {
     const now = new Date();
-    const startOfYear = new Date(now.getFullYear(), 0, 0);
-    const diff = now.getTime() - startOfYear.getTime();
+    
+    // Get current date components in Nepal timezone
+    const nepalTimeOptions: Intl.DateTimeFormatOptions = { 
+      timeZone: 'Asia/Kathmandu',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+    };
+    const nepalDateString = new Intl.DateTimeFormat('en-US', nepalTimeOptions).format(now);
+    const [month, day, year] = nepalDateString.split('/').map(Number);
+    
+    // Create a local date object using Nepal's year, month, and day to calculate day of year safely
+    const nepalDate = new Date(year, month - 1, day);
+    const startOfYear = new Date(year, 0, 0);
+    const diff = nepalDate.getTime() - startOfYear.getTime();
     const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
     const index = Math.abs(dayOfYear) % WORDS_OF_THE_DAY.length;
 
-    const formattedDate = now.toLocaleDateString(undefined, {
+    const formattedDate = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Kathmandu',
       month: 'short',
       day: 'numeric'
-    });
+    }).format(now);
 
     return {
       todayWord: WORDS_OF_THE_DAY[index] || WORDS_OF_THE_DAY[0],
@@ -332,12 +346,23 @@ export const WordOfTheDayCard: React.FC = () => {
 
         <button
           onClick={(e) => handleSpeak(e)}
-          className={`flex h-9 w-9 items-center justify-center rounded-full bg-white text-blue-600 shadow-md transition-all active:scale-90 hover:scale-105 cursor-pointer ${
+          className={`flex h-9 px-3 items-center justify-center gap-1.5 rounded-full bg-white text-blue-600 shadow-md transition-all active:scale-90 hover:scale-105 cursor-pointer ${
             isPlaying ? 'ring-4 ring-white/50 scale-105' : ''
           }`}
           title="Listen to European Portuguese Pronunciation"
         >
-          <Volume2 className="w-4 h-4 text-blue-600" />
+          <Volume2 className={`w-4 h-4 text-blue-600 ${isPlaying ? 'animate-bounce' : ''}`} />
+          {isPlaying && (
+            <div className="flex items-center gap-0.5 h-3">
+              {[1, 2, 3].map(b => (
+                <span 
+                  key={b} 
+                  className="w-0.5 bg-blue-600 rounded-full animate-pulse"
+                  style={{ height: `${(b * 3) % 8 + 3}px`, animationDelay: `${b * 120}ms` }}
+                />
+              ))}
+            </div>
+          )}
         </button>
       </div>
 

@@ -42,11 +42,13 @@ import { NepaliBridgeModal } from './components/NepaliBridgeModal';
 import { PortugalJourneyMapModal } from './components/PortugalJourneyMapModal';
 import { EuroCashierModal } from './components/EuroCashierModal';
 import { DailyQuestsModal } from './components/DailyQuestsModal';
+import { VoiceSettingsModal } from './components/VoiceSettingsModal';
 import { ArcadeHubSection } from './components/ArcadeHubSection';
 import { LisboaHeroBanner } from './components/LisboaHeroBanner';
 import { LisboaTabNav, HomeTab } from './components/LisboaTabNav';
 import { DiscoveryCarousel } from './components/DiscoveryCarousel';
 import { getDailyQuests } from './utils/quests';
+import { getNepalDateString } from './utils/date';
 import { PlaneIcon, WaveformIcon, ChevronRightIcon } from './components/icons/AppleIcons';
 import { MapPin, Coins, Gem, Sparkles, Gift, Brain, Lock, Check } from 'lucide-react';
 import { FlagPortugal, FlagNepal, PremiumTrophy, GoldCoin } from './components/icons/PremiumIcons';
@@ -99,9 +101,15 @@ export default function App() {
     }
   }, [theme]);
 
-  // Greeting based on time and selected language
+  // Greeting based on time and selected language (Nepal Time)
   const getGreeting = () => {
-    const hour = new Date().getHours();
+    const nepalTimeOptions: Intl.DateTimeFormatOptions = { 
+      timeZone: 'Asia/Kathmandu',
+      hour: 'numeric',
+      hour12: false
+    };
+    const hour = parseInt(new Intl.DateTimeFormat('en-US', nepalTimeOptions).format(new Date()), 10);
+    
     if (lang === 'pt') {
       if (hour < 12) return 'Bom dia, Puntey! 🇵🇹';
       if (hour < 20) return 'Boa tarde, Puntey! 🇵🇹';
@@ -223,7 +231,7 @@ export default function App() {
 
   // Quest Progress Incrementer
   const incrementQuestProgress = (type: 'quiz' | 'survival' | 'cashier' | 'map' | 'perfect') => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getNepalDateString();
     const questMap: Record<string, string> = {
       quiz: 'quest_quiz',
       perfect: 'quest_perfect',
@@ -281,9 +289,10 @@ export default function App() {
     incrementQuestProgress('quiz');
     const isFlawless = score === total;
     const isHighScore = score >= Math.ceil(total * 0.8);
-    const gemReward = isFlawless ? 2 : isHighScore ? 1 : 0;
-    const coinReward = isFlawless ? Math.max(earnedCoins, 20) : isHighScore ? Math.max(earnedCoins, 15) : Math.max(earnedCoins, 10);
-    const xpReward = isFlawless ? Math.max(earnedXP, 35) : Math.max(earnedXP, 20);
+    // Gems are ultra-rare prestige tokens: earned ONLY on 100% flawless mastery!
+    const gemReward = isFlawless ? 1 : 0;
+    const coinReward = isFlawless ? Math.max(earnedCoins, 30) : isHighScore ? Math.max(earnedCoins, 20) : Math.max(earnedCoins, 10);
+    const xpReward = isFlawless ? Math.max(earnedXP, 40) : Math.max(earnedXP, 25);
 
     if (isFlawless) {
       incrementQuestProgress('perfect');
@@ -301,11 +310,11 @@ export default function App() {
     if (isFlawless) {
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 5000);
-      showToast(`FLAWLESS 100%! +${xpReward} XP, +${coinReward} Coins, and +2 Gems 💎💎!`);
-      updateSpeech('🎉', 'PERFECT SCORE! Sujan is so proud of you! +2 Gems earned! 💎💎');
+      showToast(`FLAWLESS 100%! +${xpReward} XP, +${coinReward} Coins, and +1 Rare Gem 💎!`);
+      updateSpeech('🎉', 'PERFECT SCORE! Sujan is so proud of you! +1 Rare Gem earned! 💎');
     } else if (isHighScore) {
-      showToast(`Great Score: ${score}/${total}! +${xpReward} XP, +${coinReward} Coins & +1 Gem 💎!`);
-      updateSpeech('🐵', `Super work! Score: ${score}/${total}! +1 Gem earned! 💎`);
+      showToast(`Great Score: ${score}/${total}! +${xpReward} XP & +${coinReward} Coins 🪙!`);
+      updateSpeech('🐵', `Super work! Score: ${score}/${total}! Keep going to earn Gems on 100%! 🌟`);
     } else {
       showToast(`Quiz Complete! Score: ${score}/${total}. +${xpReward} XP & +${coinReward} Coins 🪙!`);
       updateSpeech('🐵', `Good practice! You got ${score}/${total} right! Keep going!`);
@@ -365,14 +374,14 @@ export default function App() {
   const handleConvertCoinsToGem = () => {
     setProgress(prev => ({
       ...prev,
-      coins: Math.max(0, prev.coins - 150),
+      coins: Math.max(0, prev.coins - 300),
       gems: prev.gems + 1,
     }));
   };
 
   // Claim Daily Quest Reward
   const handleClaimQuest = (questId: string, xp: number, coins: number, gems: number) => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getNepalDateString();
     setProgress(prev => {
       const quests = { ...(prev.quests || {}) };
       const currentEntry = quests[questId] || { current: 0, isClaimed: false, date: today };
@@ -475,6 +484,7 @@ export default function App() {
         onToggleLang={() => setLang(prev => prev === 'pt' ? 'en' : 'pt')}
         onOpenVault={() => setActiveModal('vault')}
         onOpenQuests={() => setActiveModal('quests')}
+        onOpenVoiceSettings={() => setActiveModal('voiceSettings')}
         onGoHome={() => setActiveModal('none')}
       />
 
@@ -1128,6 +1138,13 @@ export default function App() {
             setTimeout(() => setShowConfetti(false), 3500);
             showToast(`Story Completed! +${xp} XP, +${coinGain} Coins & +1 Gem 💎!`);
           }}
+        />
+      )}
+
+      {activeModal === 'voiceSettings' && (
+        <VoiceSettingsModal
+          onClose={() => setActiveModal('none')}
+          lang={lang}
         />
       )}
 

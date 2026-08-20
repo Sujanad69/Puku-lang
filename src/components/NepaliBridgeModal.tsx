@@ -53,6 +53,19 @@ export const NepaliBridgeModal: React.FC<NepaliBridgeModalProps> = ({ onClose })
             <div className="absolute -top-12 -right-12 w-48 h-48 bg-indigo-200 rounded-full blur-2xl"></div>
             <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-purple-300 rounded-full blur-2xl"></div>
           </div>
+          
+          {/* Animated Bridge Scene with Tram and Car */}
+          <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none overflow-hidden border-t-2 border-white/20">
+            <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/30"></div> {/* Bridge Deck */}
+            {/* Animated Tram */}
+            <div className="absolute bottom-1.5 animate-drive-right">
+              <div className="text-3xl filter drop-shadow-lg">🚋</div>
+            </div>
+            {/* Animated Car */}
+            <div className="absolute bottom-1.5 animate-drive-left">
+              <div className="text-2xl filter drop-shadow-lg transform -scale-x-100">🚗</div>
+            </div>
+          </div>
 
           {/* Top Actions Bar (No overlap on mobile) */}
           <div className="relative z-10 flex items-center justify-between gap-2 mb-3">

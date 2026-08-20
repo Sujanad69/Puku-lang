@@ -91,7 +91,8 @@ export const SURVIVAL_SCENARIOS: SurvivalScenario[] = [
         pt: 'As malas do voo chegam no tapete número 4, mesmo ali em frente.',
         en: 'Baggage from your flight arrives at belt number 4, right straight ahead.',
         nepaliPhonetic: 'आश मालाश् दु भोउ सेगाम नु तापेते नुमेरु क्वात्रु, मेज्मु आली एँ फ्रेन्ते।',
-        nepaliMeaning: 'तपाईंको उडानको सामान बेल्ट नम्बर ४ मा आउँछ, ठ्याक्कै अगाडि।'
+        nepaliMeaning: 'तपाईंको उडानको सामान बेल्ट नम्बर ४ मा आउँछ, ठ्याक्कै अगाडि।',
+        culturalTip: 'Look for the green illuminated sign "Recolha de Bagagem" (Baggage Claim).'
       },
       {
         speaker: 'amisha',
@@ -101,7 +102,25 @@ export const SURVIVAL_SCENARIOS: SurvivalScenario[] = [
         en: 'Excuse me, how can I buy the Navegante transport card?',
         nepaliPhonetic: 'दिशकुल्प, कोमु पोसु कोम्प्रा उ कार्ताउँ नावेगाँते?',
         nepaliMeaning: 'माफ गर्नुहोस्, म नाभेगान्ते (Navegante) कार्ड कसरी किन्न सक्छु?',
-        culturalTip: '"Navegante Ocasional" (formerly Viva Viagem) is the reusable green paper card for all Lisbon trains, buses, and metro (€0.50 card fee + top-up).'
+        culturalTip: '"Navegante Ocasional" (formerly Viva Viagem) is the reusable green paper card for all Lisbon trains, buses, and metro (€0.50 card fee + top-up).',
+        options: [
+          {
+            textPt: 'Quero carregar dez euros em zapping, por favor.',
+            textEn: 'I want to top up ten euros in zapping, please.',
+            textNepali: 'म १० युरो "Zapping" लोड गर्न चाहन्छु, प्लिज।',
+            isCorrect: true,
+            feedback: 'Zapping is the cheapest way to travel across Lisbon (€1.61 per trip)!',
+            nepaliFeedback: 'Zapping ले लिस्बनभर यात्रा गर्न सबैभन्दा सस्तो पर्छ!'
+          },
+          {
+            textPt: 'A máquina comeu o meu dinheiro!',
+            textEn: 'The machine ate my money!',
+            textNepali: 'मेसिनले मेरो पैसा खाइदियो!',
+            isCorrect: false,
+            feedback: 'Only use this if the ticket machine actually malfunctions!',
+            nepaliFeedback: 'यो मेसिन बिग्रिएर पैसा अड्किएमा मात्र भन्नुहोस्।'
+          }
+        ]
       },
       {
         speaker: 'sujan',
@@ -119,6 +138,14 @@ export const SURVIVAL_SCENARIOS: SurvivalScenario[] = [
             isCorrect: true,
             feedback: 'Aww! The most romantic European Portuguese reunion phrasing ❤️',
             nepaliFeedback: 'साँच्चिकै मायालु र शुद्ध पोर्चुगिज पुनर्मिलन ❤️'
+          },
+          {
+            textPt: 'Não te conheço, quem és?',
+            textEn: 'I do not know you, who are you?',
+            textNepali: 'म चिन्दिनँ, तपाईं को हो?',
+            isCorrect: false,
+            feedback: 'Haha! Don\'t tease Sujan, give him a warm hug!',
+            nepaliFeedback: 'सुजनलाई जिस्क्याउने हैन, मायालु अँगालो हाल्नुहोस्!'
           }
         ]
       }
@@ -178,17 +205,26 @@ export const SURVIVAL_SCENARIOS: SurvivalScenario[] = [
         pt: 'Deseja canela e açúcar nos pastéis?',
         en: 'Would you like cinnamon and sugar on the tarts?',
         nepaliPhonetic: 'दिसिजा कानेला इ आसूकार नुश् पास्तेइश?',
-        nepaliMeaning: 'के पेस्टलमा दालचिनी (Canela) र चिनी धुलो छर्किदिऊँ?'
-      },
-      {
-        speaker: 'amisha',
-        speakerName: 'Amisha',
-        speakerRole: 'Customer',
-        pt: 'Sim, só canela, obrigada! Estão deliciosos.',
-        en: 'Yes, only cinnamon, thank you! They are delicious.',
-        nepaliPhonetic: 'सिम, सो कानेला, उब्रिगादा! स्ताउँ दिलिसियोजुश।',
-        nepaliMeaning: 'हजुर, दालचिनी मात्र, धन्यवाद! धेरै मिठो छ।',
-        culturalTip: 'Since Amisha is a woman, she says "Obrigada" (ending in -a). Men say "Obrigado" (ending in -o).'
+        nepaliMeaning: 'के पेस्टलमा दालचिनी (Canela) र चिनी धुलो छर्किदिऊँ?',
+        culturalTip: 'Locals almost always sprinkle ground cinnamon (canela) on fresh warm pastéis de nata!',
+        options: [
+          {
+            textPt: 'Sim, só canela, obrigada! Estão deliciosos.',
+            textEn: 'Yes, only cinnamon, thank you! They are delicious.',
+            textNepali: 'हजुर, दालचिनी मात्र, धन्यवाद! धेरै मिठो छ।',
+            isCorrect: true,
+            feedback: 'Authentic choice! Women say "Obrigada" (ending in -a).',
+            nepaliFeedback: 'शुद्ध लिस्बन शैली! महिलाहरूले "Obrigada" भन्छन्।'
+          },
+          {
+            textPt: 'Não gosto de canela.',
+            textEn: 'I do not like cinnamon.',
+            textNepali: 'मलाई दालचिनी मन पर्दैन।',
+            isCorrect: false,
+            feedback: 'Valid preference, but trying with cinnamon is the true Lisbon rite of passage!',
+            nepaliFeedback: 'दालचिनी छर्केर खानु लिस्बनको खास स्वाद हो!'
+          }
+        ]
       },
       {
         speaker: 'amisha',
@@ -206,6 +242,14 @@ export const SURVIVAL_SCENARIOS: SurvivalScenario[] = [
             isCorrect: true,
             feedback: '"Multibanco" is the national card payment network in Portugal!',
             nepaliFeedback: 'पोर्चुगलमा कार्ड भुक्तानीलाई "Multibanco" भनिन्छ!'
+          },
+          {
+            textPt: 'Não tenho dinheiro comigo.',
+            textEn: 'I do not have money with me.',
+            textNepali: 'मसँग पैसा छैन।',
+            isCorrect: false,
+            feedback: 'Always ask for Multibanco or card payment politely!',
+            nepaliFeedback: 'सधैं शिष्टतापूर्वक कार्ड वा मल्टिब्यांको सोध्नुहोस्।'
           }
         ]
       }
@@ -237,7 +281,25 @@ export const SURVIVAL_SCENARIOS: SurvivalScenario[] = [
         en: 'Good afternoon. Where can I weigh the apples?',
         nepaliPhonetic: 'बोवा तार्द। ओन्दे पोसु पजार आश मासाँश?',
         nepaliMeaning: 'शुभ दिउँसो। म स्याउ कहाँ जोख्न सक्छु?',
-        culturalTip: 'In Portuguese supermarkets, you MUST weigh fruits/veggies yourself in the produce section, note the 2 or 3-digit number, and stick the printed barcode label on the bag before heading to the register!'
+        culturalTip: 'In Portuguese supermarkets, you MUST weigh fruits/veggies yourself in the produce section, note the 2 or 3-digit number, and stick the printed barcode label on the bag before heading to the register!',
+        options: [
+          {
+            textPt: 'Vou colocar o número 24 na balança.',
+            textEn: 'I will enter number 24 on the scale.',
+            textNepali: 'म तराजुमा नम्बर २४ थिच्नेछु।',
+            isCorrect: true,
+            feedback: 'Exactly right! Every fruit box shows its dedicated scale number.',
+            nepaliFeedback: 'ठ्याक्कै सही! हरेक फलफूलको बक्समा तराजु नम्बर लेखिएको हुन्छ।'
+          },
+          {
+            textPt: 'Levo as maçãs sem pesar para a caixa.',
+            textEn: 'I take apples to the checkout without weighing.',
+            textNepali: 'म नजोखी सिधै काउन्टरमा लैजान्छु।',
+            isCorrect: false,
+            feedback: 'Don\'t do this! In Portugal, the cashier will ask you to go back and weigh them.',
+            nepaliFeedback: 'यस्तो नगर्नुहोस्! पोर्चुगलमा काउन्टरमा लैजानुअघि आफैं जोख्नुपर्छ।'
+          }
+        ]
       },
       {
         speaker: 'local',
@@ -255,6 +317,14 @@ export const SURVIVAL_SCENARIOS: SurvivalScenario[] = [
             isCorrect: true,
             feedback: 'Clear, polite, and simple!',
             nepaliFeedback: 'सटीक र स्पष्ट जवाफ!'
+          },
+          {
+            textPt: 'O que é isso?',
+            textEn: 'What is that?',
+            textNepali: 'त्यो के हो?',
+            isCorrect: false,
+            feedback: '"Não tenho, obrigada" is much more efficient at checkout.',
+            nepaliFeedback: '"Não tenho, obrigada" भन्नु सबैभन्दा राम्रो हो।'
           }
         ]
       },
@@ -275,6 +345,14 @@ export const SURVIVAL_SCENARIOS: SurvivalScenario[] = [
             isCorrect: true,
             feedback: 'Perfeito! Exactly how locals answer daily.',
             nepaliFeedback: 'उत्कृष्ट! स्थानीय बासिन्दाहरूले दैनिक यसरी नै जवाफ दिन्छन्।'
+          },
+          {
+            textPt: 'Quero dez sacos de graça.',
+            textEn: 'I want ten bags for free.',
+            textNepali: 'मलाई १० वटा झोला सित्तैमा चाहिन्छ।',
+            isCorrect: false,
+            feedback: 'Bags are not free in Portugal due to eco-laws.',
+            nepaliFeedback: 'पोर्चुगलमा झोला निःशुल्क हुँदैन।'
           }
         ]
       }
@@ -324,6 +402,14 @@ export const SURVIVAL_SCENARIOS: SurvivalScenario[] = [
             isCorrect: true,
             feedback: 'Warm and gracious! Portuguese people appreciate friendly courtesy.',
             nepaliFeedback: 'धेरै राम्रो! पोर्चुगाली मानिसहरू यस्तो शिष्टता धेरै मन पराउँछन्।'
+          },
+          {
+            textPt: 'Tchau.',
+            textEn: 'Bye.',
+            textNepali: 'बाइ।',
+            isCorrect: false,
+            feedback: 'A little too brief! Adding "Muito obrigada" is much warmer.',
+            nepaliFeedback: 'अलि छोटो भयो! "Muito obrigada" भन्नु धेरै राम्रो।'
           }
         ]
       }
@@ -363,6 +449,14 @@ export const SURVIVAL_SCENARIOS: SurvivalScenario[] = [
             isCorrect: true,
             feedback: 'Note: In Portugal, "constipada" means having a cold (NOT constipated)!',
             nepaliFeedback: 'ख्याल गर्नुहोस्: पोर्चुगलमा "constipada" भनेको रुघाखोकी लाग्नु हो!'
+          },
+          {
+            textPt: 'Dá-me tudo o que tens.',
+            textEn: 'Give me everything you have.',
+            textNepali: 'तिमीसँग जे छ सबै देऊ।',
+            isCorrect: false,
+            feedback: 'Clearly state your symptoms to the pharmacist instead.',
+            nepaliFeedback: 'सधैं आफ्ना लक्षणहरू प्रष्ट बताउनुहोस्।'
           }
         ]
       },
@@ -373,7 +467,8 @@ export const SURVIVAL_SCENARIOS: SurvivalScenario[] = [
         pt: 'Recomendo estas pastilhas e paracetamol. Tome um comprimido de oito em oito horas.',
         en: 'I recommend these lozenges and paracetamol. Take one tablet every 8 hours.',
         nepaliPhonetic: 'रेकुमेन्दु एश्ताश पास्तिल्याश इ पारासितामोल। तोम उम कोम्प्रिमिदु द ओइतु एँ ओइतु ओराश।',
-        nepaliMeaning: 'म यो चुस्ने चक्की र प्यारासिटामोल सिफारिस गर्छु। हरेक ८ घण्टामा एउटा चक्की खानुहोस्।'
+        nepaliMeaning: 'म यो चुस्ने चक्की र प्यारासिटामोल सिफारिस गर्छु। हरेक ८ घण्टामा एउटा चक्की खानुहोस्।',
+        culturalTip: 'Pharmacies in Portugal can provide over-the-counter paracetamol and ibuprofen without a doctor prescription.'
       },
       {
         speaker: 'amisha',
@@ -382,7 +477,25 @@ export const SURVIVAL_SCENARIOS: SurvivalScenario[] = [
         pt: 'Muito obrigada pelas explicações! As melhoras para o meu dia.',
         en: 'Thank you very much for the explanations!',
         nepaliPhonetic: 'मुइतु उब्रिगादा पेलाश इश्प्लिकसाँइश!',
-        nepaliMeaning: 'सम्झाइदिनुभएकोमा धेरै धन्यवाद!'
+        nepaliMeaning: 'सम्झाइदिनुभएकोमा धेरै धन्यवाद!',
+        options: [
+          {
+            textPt: 'Muito obrigada pela ajuda e bom trabalho!',
+            textEn: 'Thank you very much for the help and good work!',
+            textNepali: 'मद्दतको लागि धेरै धन्यवाद, काम राम्रोसँग बितोस्!',
+            isCorrect: true,
+            feedback: 'Polite and respectful European Portuguese!',
+            nepaliFeedback: 'धेरै शिष्ट र आदरणीय भाषा!'
+          },
+          {
+            textPt: 'Adeus.',
+            textEn: 'Goodbye.',
+            textNepali: 'बाई।',
+            isCorrect: false,
+            feedback: 'A courteous closing is always warmer with healthcare professionals.',
+            nepaliFeedback: 'स्वास्थ्यकर्मीसँग न्यानो बिदाइ उपयुक्त हुन्छ।'
+          }
+        ]
       }
     ]
   }

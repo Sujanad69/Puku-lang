@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { speakPt, playTone, playSuccessSound } from '../../utils/audio';
 import { AudioWaveVisualizer } from '../AudioWaveVisualizer';
 import { SpeakingStage } from './SpeakingStage';
-import { Volume2, Sparkles } from 'lucide-react';
+import { WordDetailPreviewModal } from '../WordDetailPreviewModal';
+import { Volume2, Sparkles, Eye } from 'lucide-react';
 
 interface LessonEngineProps {
   unit: Unit;
@@ -121,6 +122,7 @@ export const LessonEngine: React.FC<LessonEngineProps> = ({ unit, lessonIndex, g
 // --- STAGE 1: DISCOVER ---
 const DiscoverStage: React.FC<{ words: VocabWord[], isLoveUnit?: boolean, onComplete: () => void }> = ({ words, isLoveUnit, onComplete }) => {
   const [playingIdx, setPlayingIdx] = useState<number | null>(null);
+  const [previewWord, setPreviewWord] = useState<VocabWord | null>(null);
 
   const handlePlayWord = (word: VocabWord, idx: number) => {
     setPlayingIdx(idx);
@@ -209,34 +211,49 @@ const DiscoverStage: React.FC<{ words: VocabWord[], isLoveUnit?: boolean, onComp
                     </div>
                   </div>
 
-                  {/* Audio Button with Visualizer Waves */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handlePlayWord(word, idx);
-                    }}
-                    className={`relative flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-2xl transition-all shadow-sm ${
-                      isPlaying
-                        ? isLoveUnit
-                          ? 'bg-rose-500 text-white shadow-rose-500/30 scale-105'
-                          : 'bg-blue-600 text-white shadow-blue-500/30 scale-105'
-                        : isLoveUnit
-                          ? 'bg-rose-500/10 text-rose-500 hover:bg-rose-500/20'
-                          : 'bg-[#1CB0F6]/10 text-[#1CB0F6] hover:bg-[#1CB0F6]/20'
-                    }`}
-                    title="Play Pronunciation"
-                  >
-                    {isPlaying ? (
-                      <AudioWaveVisualizer
-                        isPlaying={true}
-                        size="sm"
-                        barsCount={5}
-                        color="white"
-                      />
-                    ) : (
-                      <Volume2 className="w-5 h-5 ml-0.5" />
-                    )}
-                  </button>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {/* Preview Eye Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        playTone(580, 'sine', 0.04);
+                        setPreviewWord(word);
+                      }}
+                      className="w-10 h-10 flex items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white transition-all border border-blue-200/50 dark:border-blue-800/50 cursor-pointer"
+                      title="Preview Love Examples"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </button>
+
+                    {/* Audio Button with Visualizer Waves */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePlayWord(word, idx);
+                      }}
+                      className={`relative w-12 h-12 flex items-center justify-center rounded-2xl transition-all shadow-sm ${
+                        isPlaying
+                          ? isLoveUnit
+                            ? 'bg-rose-500 text-white shadow-rose-500/30 scale-105'
+                            : 'bg-blue-600 text-white shadow-blue-500/30 scale-105'
+                          : isLoveUnit
+                            ? 'bg-rose-500/10 text-rose-500 hover:bg-rose-500/20'
+                            : 'bg-[#1CB0F6]/10 text-[#1CB0F6] hover:bg-[#1CB0F6]/20'
+                      }`}
+                      title="Play Pronunciation"
+                    >
+                      {isPlaying ? (
+                        <AudioWaveVisualizer
+                          isPlaying={true}
+                          size="sm"
+                          barsCount={5}
+                          color="white"
+                        />
+                      ) : (
+                        <Volume2 className="w-5 h-5 ml-0.5" />
+                      )}
+                    </button>
+                  </div>
                 </motion.div>
               );
             })}
@@ -254,6 +271,15 @@ const DiscoverStage: React.FC<{ words: VocabWord[], isLoveUnit?: boolean, onComp
           </button>
         </div>
       </div>
+
+      {/* Global Word Detail Preview Modal */}
+      {previewWord && (
+        <WordDetailPreviewModal
+          word={previewWord}
+          chapterTitle={isLoveUnit ? "Love Unit" : "Lesson Discovery"}
+          onClose={() => setPreviewWord(null)}
+        />
+      )}
     </motion.div>
   );
 };

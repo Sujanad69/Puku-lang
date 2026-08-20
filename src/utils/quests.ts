@@ -1,5 +1,7 @@
 import { DailyQuest, UserProgress } from '../types';
 
+import { getNepalDateString } from './date';
+
 export const DAILY_QUEST_TEMPLATES: Omit<DailyQuest, 'current' | 'isClaimed'>[] = [
   {
     id: 'quest_xp',
@@ -9,9 +11,9 @@ export const DAILY_QUEST_TEMPLATES: Omit<DailyQuest, 'current' | 'isClaimed'>[] 
     nepaliHint: 'आज कुनै पनि पाठ वा खेलबाट ६० XP कमाउनुहोस्',
     icon: '⚡',
     target: 60,
-    rewardXP: 25,
+    rewardXP: 30,
     rewardCoins: 40,
-    rewardGems: 1,
+    rewardGems: 0,
     type: 'xp',
   },
   {
@@ -22,22 +24,22 @@ export const DAILY_QUEST_TEMPLATES: Omit<DailyQuest, 'current' | 'isClaimed'>[] 
     nepaliHint: '२ वटा क्विज पूरा गर्नुहोस्',
     icon: '🎯',
     target: 2,
-    rewardXP: 30,
+    rewardXP: 35,
     rewardCoins: 50,
-    rewardGems: 1,
+    rewardGems: 0,
     type: 'quiz',
   },
   {
     id: 'quest_perfect',
-    title: 'Flawless Accuracy',
-    titlePt: 'Perfeição 100%',
+    title: 'Flawless Accuracy (Gem Quest 💎)',
+    titlePt: 'Perfeição 100% (Gema Rara 💎)',
     description: 'Score 100% on at least 1 quiz or mini-game.',
-    nepaliHint: '१००% सही नतिजा ल्याएर रत्न कमाउनुहोस्',
+    nepaliHint: '१००% सही नतिजा ल्याएर दुर्लभ रत्न कमाउनुहोस्',
     icon: 'trophy',
     target: 1,
-    rewardXP: 35,
-    rewardCoins: 60,
-    rewardGems: 2,
+    rewardXP: 50,
+    rewardCoins: 75,
+    rewardGems: 1,
     type: 'perfect',
   },
   {
@@ -50,7 +52,7 @@ export const DAILY_QUEST_TEMPLATES: Omit<DailyQuest, 'current' | 'isClaimed'>[] 
     target: 1,
     rewardXP: 30,
     rewardCoins: 45,
-    rewardGems: 1,
+    rewardGems: 0,
     type: 'survival',
   },
   {
@@ -61,9 +63,9 @@ export const DAILY_QUEST_TEMPLATES: Omit<DailyQuest, 'current' | 'isClaimed'>[] 
     nepaliHint: 'युरो क्यासियर खेलमा पोर्चुगिज सिक्का गन्नुहोस्',
     icon: '💶',
     target: 1,
-    rewardXP: 25,
+    rewardXP: 30,
     rewardCoins: 50,
-    rewardGems: 1,
+    rewardGems: 0,
     type: 'cashier',
   },
   {
@@ -76,7 +78,7 @@ export const DAILY_QUEST_TEMPLATES: Omit<DailyQuest, 'current' | 'isClaimed'>[] 
     target: 1,
     rewardXP: 25,
     rewardCoins: 40,
-    rewardGems: 1,
+    rewardGems: 0,
     type: 'map',
   },
 ];
@@ -85,18 +87,15 @@ export const DAILY_QUEST_TEMPLATES: Omit<DailyQuest, 'current' | 'isClaimed'>[] 
  * Returns today's active 3 quests for the user, calculating real current progress.
  */
 export function getDailyQuests(progress: UserProgress): DailyQuest[] {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getNepalDateString();
   const userQuests = progress.quests || {};
 
-  // Pick 3 core templates
-  // 1: XP / Focus
-  // 2: Quiz / Perfect
-  // 3: Practical (Survival / Cashier / Map)
+  // Pick core templates including the rare gem quest
   const selectedTemplates = [
     DAILY_QUEST_TEMPLATES[0], // XP Focus
     DAILY_QUEST_TEMPLATES[1], // Quiz Master
+    DAILY_QUEST_TEMPLATES[2], // Flawless Accuracy (Gem Bounty!)
     DAILY_QUEST_TEMPLATES[3], // Survival / Real-world
-    DAILY_QUEST_TEMPLATES[4], // Euro Cashier
   ];
 
   return selectedTemplates.map(template => {

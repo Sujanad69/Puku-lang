@@ -223,14 +223,19 @@ export const QuizModal: React.FC<QuizModalProps> = ({
       setVoiceResult('');
     } else {
       const totalCoins = earnedXP;
-      const isPerfect = score + (isCorrect ? 1 : 0) === quizPool.length;
+      const finalScore = score + (isCorrect ? 1 : 0);
+      const isPerfect = finalScore === quizPool.length;
       
+      if (isPerfect || finalScore >= 3) {
+        playSuccessSound();
+      }
+
       window.dispatchEvent(new CustomEvent('puku:lesson_complete', { 
-        detail: { isPerfect, score: score + (isCorrect ? 1 : 0) } 
+        detail: { isPerfect, score: finalScore } 
       }));
 
       onComplete(
-        score + (isCorrect ? 1 : 0),
+        finalScore,
         quizPool.length,
         earnedXP,
         totalCoins,

@@ -19,7 +19,9 @@ import {
   XCircle,
   RotateCcw,
   BookOpen,
-  Play
+  Play,
+  Check,
+  Heart
 } from 'lucide-react';
 
 interface SurvivalSimulatorModalProps {
@@ -36,7 +38,7 @@ export const SurvivalSimulatorModal: React.FC<SurvivalSimulatorModalProps> = ({
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
   const [selectedOptionIndex, setSelectedOptionIndex] = useState<number | null>(null);
   const [isAnswerChecked, setIsAnswerChecked] = useState<boolean>(false);
-  const [slowAudio, setSlowAudio] = useState<boolean>(false);
+  const [isSlowAudio, setIsSlowAudio] = useState<boolean>(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'simulator' | 'cheatsheet'>('simulator');
   const [completedScenarios, setCompletedScenarios] = useState<string[]>([]);
@@ -47,10 +49,12 @@ export const SurvivalSimulatorModal: React.FC<SurvivalSimulatorModalProps> = ({
       case 'airport':
         return <Plane className="w-5 h-5" />;
       case 'cafe':
+      case 'pastelaria':
         return <Coffee className="w-5 h-5" />;
       case 'supermarket':
         return <ShoppingBag className="w-5 h-5" />;
       case 'metro':
+      case 'transport':
         return <Train className="w-5 h-5" />;
       case 'pharmacy':
         return <HeartPulse className="w-5 h-5" />;
@@ -73,7 +77,7 @@ export const SurvivalSimulatorModal: React.FC<SurvivalSimulatorModalProps> = ({
     if (firstStep) {
       setIsPlayingAudio(true);
       setTimeout(() => {
-        speakPt(firstStep.pt, slowAudio);
+        speakPt(firstStep.pt, isSlowAudio);
         setTimeout(() => setIsPlayingAudio(false), 2000);
       }, 300);
     }
@@ -84,12 +88,13 @@ export const SurvivalSimulatorModal: React.FC<SurvivalSimulatorModalProps> = ({
     playTone(520, 'sine', 0.05);
     triggerHaptic('light');
     setIsPlayingAudio(true);
-    speakPt(text, slowAudio);
+    speakPt(text, isSlowAudio);
     setTimeout(() => setIsPlayingAudio(false), 2000);
   };
 
   const currentStep = selectedScenario ? selectedScenario.dialogue[currentStepIndex] : null;
   const isLastStep = selectedScenario ? currentStepIndex === selectedScenario.dialogue.length - 1 : false;
+  const hasOptions = Boolean(currentStep?.options && currentStep.options.length > 0);
 
   const handleOptionSelect = (index: number) => {
     if (isAnswerChecked) return;
@@ -124,20 +129,20 @@ export const SurvivalSimulatorModal: React.FC<SurvivalSimulatorModalProps> = ({
       }
       onCompleteScenario(selectedScenario.id, 30, 8);
     } else {
-      playTone(580, 'sine', 0.05);
+      playTone(580, 'sine', 0.04);
       triggerHaptic('light');
-      const nextIndex = currentStepIndex + 1;
-      setCurrentStepIndex(nextIndex);
+      const nextIdx = currentStepIndex + 1;
+      setCurrentStepIndex(nextIdx);
       setSelectedOptionIndex(null);
       setIsAnswerChecked(false);
 
-      const nextStep = selectedScenario.dialogue[nextIndex];
+      const nextStep = selectedScenario.dialogue[nextIdx];
       if (nextStep) {
         setIsPlayingAudio(true);
         setTimeout(() => {
-          speakPt(nextStep.pt, slowAudio);
+          speakPt(nextStep.pt, isSlowAudio);
           setTimeout(() => setIsPlayingAudio(false), 2000);
-        }, 200);
+        }, 300);
       }
     }
   };
@@ -148,61 +153,63 @@ export const SurvivalSimulatorModal: React.FC<SurvivalSimulatorModalProps> = ({
       <div className="relative w-full max-w-2xl overflow-hidden rounded-[36px] bg-white dark:bg-[#12141a] border border-slate-200/60 dark:border-slate-800/80 shadow-2xl flex flex-col max-h-[92vh] ios-modal-scale-in">
         
         {/* ================= HEADER BANNER ================= */}
-        <div className="relative bg-gradient-to-br from-[#c2410c] via-[#ea580c] to-[#f97316] p-6 text-white text-center overflow-hidden shrink-0">
+        <div className="relative bg-gradient-to-br from-[#ea580c] via-[#f97316] to-[#fb923c] p-6 text-white text-center overflow-hidden shrink-0">
           
-          {/* Subtle Ambient Glows */}
+          {/* Ambient Glows */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden select-none opacity-20">
-            <div className="absolute -top-12 -right-12 w-48 h-48 bg-amber-200 rounded-full blur-2xl"></div>
-            <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-orange-300 rounded-full blur-2xl"></div>
+            <div className="absolute -top-10 -right-10 w-44 h-44 bg-white rounded-full blur-2xl"></div>
+            <div className="absolute -bottom-10 -left-10 w-44 h-44 bg-amber-200 rounded-full blur-2xl"></div>
           </div>
 
-          {/* Top Actions Bar (No overlap on mobile) */}
+          {/* Top Actions Bar */}
           <div className="relative z-10 flex items-center justify-between gap-2 mb-3">
             {/* Speed Toggle */}
-            <div className="flex-1 flex justify-start">
-              <button
-                onClick={() => {
-                  triggerHaptic('light');
-                  setSlowAudio(!slowAudio);
-                }}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all backdrop-blur-md border cursor-pointer ${
-                  slowAudio
-                    ? 'bg-amber-300 text-amber-950 border-amber-200 shadow-xs'
-                    : 'bg-black/20 text-white/90 border-white/15 hover:bg-black/30'
-                }`}
-                title="Toggle audio speed"
-              >
-                <span>🐢</span>
-                <span>{slowAudio ? '0.75x' : '1.0x'}</span>
-              </button>
-            </div>
+            <button
+              onClick={() => {
+                triggerHaptic('light');
+                setIsSlowAudio(!isSlowAudio);
+              }}
+              className={`px-3 py-1 rounded-full text-xs font-black backdrop-blur-md border transition-all cursor-pointer flex items-center gap-1.5 ${
+                isSlowAudio
+                  ? 'bg-amber-300 text-orange-950 border-amber-400 shadow-sm'
+                  : 'bg-white/20 text-white border-white/20 hover:bg-white/30'
+              }`}
+            >
+              <span>{isSlowAudio ? '🐢 0.6x Slow' : '⚡ 1.0x Normal'}</span>
+            </button>
 
             {/* Pill Badge */}
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider backdrop-blur-md border border-white/20 shadow-xs max-w-[180px] sm:max-w-none truncate">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider backdrop-blur-md border border-white/20 shadow-xs max-w-[200px] sm:max-w-none truncate">
               <Compass className="w-3.5 h-3.5 text-amber-200 shrink-0" />
-              <span className="truncate">Lisbon Survival Simulator</span>
+              <span className="truncate">
+                {selectedScenario ? selectedScenario.title : 'Lisbon Survival Missions'}
+              </span>
             </div>
 
-            {/* Close / Back Button */}
-            <div className="flex-1 flex justify-end">
-              <button
-                onClick={selectedScenario ? () => setSelectedScenario(null) : onClose}
-                className="h-8 w-8 rounded-full bg-black/20 hover:bg-black/30 flex items-center justify-center text-white transition-colors cursor-pointer backdrop-blur-md shrink-0"
-                title={selectedScenario ? "Back to Missions" : "Close"}
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                if (selectedScenario) {
+                  setSelectedScenario(null);
+                } else {
+                  onClose();
+                }
+              }}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md border border-white/20 hover:bg-white/30 transition-all active:scale-95 cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
-            {selectedScenario ? selectedScenario.title : 'Survival in Portugal 🇵🇹'}
+          {/* Title & Subtitle */}
+          <h2 className="text-xl sm:text-2xl font-black tracking-tight leading-tight">
+            {selectedScenario ? selectedScenario.title : 'Lisbon Survival Simulator'}
           </h2>
 
           <p className="text-xs sm:text-sm text-orange-100 font-medium mt-1 max-w-md mx-auto leading-relaxed">
             {selectedScenario
               ? selectedScenario.location
-              : 'Interactive dialogues, taxi rides, pastelaria orders, and emergency phrases.'}
+              : 'Interactive dialogues, taxi rides, pastelaria orders, and real Lisbon situations.'}
           </p>
 
           {/* Tabs when a scenario is open */}
@@ -371,7 +378,7 @@ export const SurvivalSimulatorModal: React.FC<SurvivalSimulatorModalProps> = ({
                 <span>{selectedScenario.title} — Key Essential Phrases</span>
               </h4>
               <p className="text-xs text-orange-700/80 dark:text-orange-300/80">
-                Tap any phrase below to hear European Portuguese pronunciation:
+                Tap any phrase below to hear authentic Lisbon pronunciation:
               </p>
             </div>
 
@@ -391,11 +398,11 @@ export const SurvivalSimulatorModal: React.FC<SurvivalSimulatorModalProps> = ({
                 </div>
 
                 <div className="space-y-1 text-xs pt-1 border-t border-slate-200/60 dark:border-slate-800">
-                  <div className="inline-block rounded-md bg-indigo-100 dark:bg-indigo-950/50 px-2 py-0.5 text-xs font-bold text-indigo-700 dark:text-indigo-300">
-                    🇳🇵 {item.nepaliPhonetic}
+                  <div className="inline-block rounded-md bg-indigo-100 dark:bg-indigo-950/50 px-2 py-0.5 text-xs font-bold text-indigo-700 dark:text-indigo-300 font-mono">
+                    /{item.nepaliPhonetic}/
                   </div>
                   <p className="font-bold text-amber-600 dark:text-amber-400">
-                    {item.nepali}
+                    🇳🇵 {item.nepali}
                   </p>
                   <p className="text-slate-500 dark:text-slate-400 font-medium">
                     "{item.en}"
@@ -457,7 +464,7 @@ export const SurvivalSimulatorModal: React.FC<SurvivalSimulatorModalProps> = ({
                       className={`h-9 w-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
                         isPlayingAudio
                           ? 'bg-orange-500 text-white ring-4 ring-orange-200'
-                          : 'bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-300'
+                          : 'bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-300 hover:bg-orange-200'
                       }`}
                       title="Listen in Portuguese"
                     >
@@ -465,45 +472,58 @@ export const SurvivalSimulatorModal: React.FC<SurvivalSimulatorModalProps> = ({
                     </button>
                   </div>
 
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     <p className="text-lg sm:text-xl font-black text-slate-900 dark:text-white leading-snug">
                       "{currentStep.pt}"
                     </p>
-                    <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">
-                      🇳🇵 {currentStep.nepali}
-                    </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      "{currentStep.en}"
-                    </p>
+
+                    {currentStep.nepaliPhonetic && (
+                      <div className="inline-block rounded-lg bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200/50 dark:border-indigo-900/40 px-2.5 py-1 text-xs font-mono font-bold text-indigo-700 dark:text-indigo-300">
+                        🗣️ /{currentStep.nepaliPhonetic}/
+                      </div>
+                    )}
+
+                    {currentStep.nepaliMeaning && (
+                      <p className="text-xs font-bold text-amber-600 dark:text-amber-400">
+                        🇳🇵 {currentStep.nepaliMeaning}
+                      </p>
+                    )}
+
+                    {currentStep.en && (
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                        "{currentStep.en}"
+                      </p>
+                    )}
                   </div>
 
-                  {currentStep.tip && (
-                    <div className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 p-3 text-xs text-slate-500 dark:text-slate-400">
-                      💡 {currentStep.tip}
+                  {currentStep.culturalTip && (
+                    <div className="rounded-xl bg-orange-50/80 dark:bg-orange-950/30 border border-orange-200/60 dark:border-orange-900/40 p-3 text-xs text-orange-900 dark:text-orange-200 flex items-start gap-2">
+                      <Lightbulb className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
+                      <span>{currentStep.culturalTip}</span>
                     </div>
                   )}
 
                 </div>
 
                 {/* Response Options */}
-                {currentStep.options && currentStep.options.length > 0 && (
-                  <div className="space-y-2">
+                {hasOptions && currentStep.options && (
+                  <div className="space-y-2.5">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-1">
                       Choose Amisha's Best Response:
                     </span>
 
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                       {currentStep.options.map((opt, idx) => {
                         const isSelected = selectedOptionIndex === idx;
-                        let optionStyle = 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 hover:border-orange-300';
+                        let cardStyle = 'bg-white dark:bg-[#181a22] border-slate-200/80 dark:border-slate-800 hover:border-orange-300';
 
                         if (isSelected && !isAnswerChecked) {
-                          optionStyle = 'bg-orange-50 dark:bg-orange-950/40 border-orange-500 ring-2 ring-orange-500/20';
+                          cardStyle = 'bg-orange-50 dark:bg-orange-950/40 border-orange-500 ring-2 ring-orange-500/20';
                         } else if (isAnswerChecked) {
                           if (opt.isCorrect) {
-                            optionStyle = 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-900 dark:text-emerald-100';
+                            cardStyle = 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-900 dark:text-emerald-100 ring-2 ring-emerald-500/20';
                           } else if (isSelected && !opt.isCorrect) {
-                            optionStyle = 'bg-rose-50 dark:bg-rose-950/40 border-rose-500 text-rose-900 dark:text-rose-100';
+                            cardStyle = 'bg-rose-50 dark:bg-rose-950/40 border-rose-500 text-rose-900 dark:text-rose-100 ring-2 ring-rose-500/20';
                           }
                         }
 
@@ -511,26 +531,57 @@ export const SurvivalSimulatorModal: React.FC<SurvivalSimulatorModalProps> = ({
                           <div
                             key={idx}
                             onClick={() => handleOptionSelect(idx)}
-                            className={`p-4 rounded-2xl border transition-all cursor-pointer space-y-1 shadow-xs ${optionStyle}`}
+                            className={`p-4 rounded-2xl border transition-all cursor-pointer space-y-2 shadow-xs ${cardStyle}`}
                           >
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm font-black text-slate-900 dark:text-white">
-                                {opt.pt}
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
+                                {opt.textPt}
                               </span>
-                              {isAnswerChecked && opt.isCorrect && (
-                                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                              )}
-                              {isAnswerChecked && isSelected && !opt.isCorrect && (
-                                <XCircle className="w-4 h-4 text-rose-500" />
-                              )}
+
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleSpeak(opt.textPt, e)}
+                                  className="h-8 w-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-orange-500 hover:text-white transition-colors"
+                                  title="Listen to option"
+                                >
+                                  <Volume2 className="w-3.5 h-3.5" />
+                                </button>
+
+                                {isAnswerChecked && opt.isCorrect && (
+                                  <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                                )}
+                                {isAnswerChecked && isSelected && !opt.isCorrect && (
+                                  <XCircle className="w-5 h-5 text-rose-500 shrink-0" />
+                                )}
+                              </div>
                             </div>
 
-                            <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">
-                              🇳🇵 {opt.nepali}
-                            </p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
-                              "{opt.en}"
-                            </p>
+                            {opt.textNepali && (
+                              <p className="text-xs font-bold text-amber-600 dark:text-amber-400">
+                                🇳🇵 {opt.textNepali}
+                              </p>
+                            )}
+
+                            {opt.textEn && (
+                              <p className="text-xs text-slate-500 dark:text-slate-400">
+                                "{opt.textEn}"
+                              </p>
+                            )}
+
+                            {/* Feedback on answer check */}
+                            {isAnswerChecked && isSelected && (
+                              <div className={`mt-2 p-2.5 rounded-xl text-xs font-medium border ${
+                                opt.isCorrect
+                                  ? 'bg-emerald-100/70 dark:bg-emerald-950/70 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200'
+                                  : 'bg-rose-100/70 dark:bg-rose-950/70 border-rose-300 dark:border-rose-800 text-rose-900 dark:text-rose-200'
+                              }`}>
+                                <p className="font-bold">{opt.feedback}</p>
+                                {opt.nepaliFeedback && (
+                                  <p className="mt-0.5 text-[11px] opacity-90">🇳🇵 {opt.nepaliFeedback}</p>
+                                )}
+                              </div>
+                            )}
                           </div>
                         );
                       })}
@@ -543,13 +594,13 @@ export const SurvivalSimulatorModal: React.FC<SurvivalSimulatorModalProps> = ({
 
             {/* Step Action Button */}
             <div className="pt-2">
-              {!isAnswerChecked ? (
+              {hasOptions && !isAnswerChecked ? (
                 <button
                   onClick={handleCheckAnswer}
                   disabled={selectedOptionIndex === null}
                   className={`w-full py-3.5 rounded-2xl font-bold text-xs text-white transition-all shadow-md cursor-pointer ${
                     selectedOptionIndex === null
-                      ? 'bg-slate-300 dark:bg-slate-800 text-slate-500 cursor-not-allowed'
+                      ? 'bg-slate-300 dark:bg-slate-800 text-slate-500 cursor-not-allowed opacity-60'
                       : 'bg-orange-600 hover:bg-orange-700 active:scale-98'
                   }`}
                 >
@@ -560,7 +611,7 @@ export const SurvivalSimulatorModal: React.FC<SurvivalSimulatorModalProps> = ({
                   onClick={handleNextStep}
                   className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 font-bold text-xs text-white transition-all shadow-md active:scale-98 cursor-pointer flex items-center justify-center gap-2"
                 >
-                  <span>{isLastStep ? 'Complete Mission' : 'Continue Next Step'}</span>
+                  <span>{isLastStep ? 'Complete Mission 🎉' : 'Continue Next Step ➜'}</span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
               )}

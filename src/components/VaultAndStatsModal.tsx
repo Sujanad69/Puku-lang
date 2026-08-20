@@ -12,6 +12,7 @@ import {
 import { ALL_WORDS_FLAT } from '../data/portugueseData';
 import { SRSReviewSessionModal } from './SRSReviewSessionModal';
 import { AppleActivityDashboard } from './AppleActivityDashboard';
+import { WordDetailPreviewModal } from './WordDetailPreviewModal';
 import { 
   X, 
   Volume2, 
@@ -30,6 +31,7 @@ import {
   Play,
   Search,
   Activity,
+  Eye,
 } from 'lucide-react';
 
 interface VaultAndStatsModalProps {
@@ -57,6 +59,7 @@ export const VaultAndStatsModal: React.FC<VaultAndStatsModalProps> = ({
   const [srsFilter, setSrsFilter] = useState<'all' | 'due' | 'learning' | 'mature'>('due');
   const [searchQuery, setSearchQuery] = useState('');
   const [playingWordPt, setPlayingWordPt] = useState<string | null>(null);
+  const [previewWord, setPreviewWord] = useState<VocabWord | null>(null);
   const [showReviewSession, setShowReviewSession] = useState(false);
   const [sessionQueue, setSessionQueue] = useState<SRSItem[]>([]);
 
@@ -526,6 +529,24 @@ export const VaultAndStatsModal: React.FC<VaultAndStatsModalProps> = ({
                         {SRS_LEVELS_LABEL[item.level as keyof typeof SRS_LEVELS_LABEL]?.name || `Level ${item.level}`}
                       </span>
 
+                      {/* Preview Eye SVG Icon */}
+                      <button
+                        onClick={() => {
+                          playTone(580, 'sine', 0.04);
+                          triggerHaptic('medium');
+                          setPreviewWord({
+                            pt: item.wordPt,
+                            en: item.en,
+                            phonetic: item.phonetic,
+                            nepali: item.nepali,
+                          });
+                        }}
+                        className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white transition-all cursor-pointer border border-blue-200/50 dark:border-blue-800/50"
+                        title="Preview Love Examples & Details"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                      </button>
+
                       {/* Quick Rate Button */}
                       <div className="flex items-center gap-1">
                         <button
@@ -615,12 +636,26 @@ export const VaultAndStatsModal: React.FC<VaultAndStatsModalProps> = ({
                       </div>
                     </div>
 
-                    <button
-                      onClick={onStartWeakWords}
-                      className="px-3 py-1.5 bg-rose-50 dark:bg-rose-950/40 text-rose-600 rounded-xl text-xs font-bold border border-rose-200 dark:border-rose-800/40 hover:bg-rose-100 cursor-pointer"
-                    >
-                      Drill Now
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          playTone(580, 'sine', 0.04);
+                          triggerHaptic('medium');
+                          setPreviewWord(word);
+                        }}
+                        className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white transition-all cursor-pointer border border-blue-200/50 dark:border-blue-800/50"
+                        title="Preview Love Examples"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                      </button>
+
+                      <button
+                        onClick={onStartWeakWords}
+                        className="px-3 py-1.5 bg-rose-50 dark:bg-rose-950/40 text-rose-600 rounded-xl text-xs font-bold border border-rose-200 dark:border-rose-800/40 hover:bg-rose-100 cursor-pointer"
+                      >
+                        Drill Now
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -630,6 +665,15 @@ export const VaultAndStatsModal: React.FC<VaultAndStatsModalProps> = ({
         )}
 
       </div>
+
+      {/* Global Word Detail Preview Modal */}
+      {previewWord && (
+        <WordDetailPreviewModal
+          word={previewWord}
+          chapterTitle="Vocabulary Vault"
+          onClose={() => setPreviewWord(null)}
+        />
+      )}
     </div>
   );
 };

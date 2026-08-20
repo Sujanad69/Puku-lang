@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { Unit } from '../types';
 import { speakPt, playTone } from '../utils/audio';
 import { triggerHaptic } from '../utils/haptics';
-import { X, Volume2, Sparkles, ChevronLeft, ChevronRight, RotateCw, Play, Layers } from 'lucide-react';
+import { X, Volume2, Sparkles, ChevronLeft, ChevronRight, RotateCw, Play, Layers, Eye } from 'lucide-react';
 import { AudioWaveVisualizer } from './AudioWaveVisualizer';
+import { WordDetailPreviewModal } from './WordDetailPreviewModal';
 
 interface FlashcardModalProps {
   unit: Unit;
@@ -15,6 +16,7 @@ export const FlashcardModal: React.FC<FlashcardModalProps> = ({ unit, onClose, o
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
   const words = unit.words;
 
   const handleNext = () => {
@@ -132,20 +134,35 @@ export const FlashcardModal: React.FC<FlashcardModalProps> = ({ unit, onClose, o
                   🇵🇹 European PT
                 </span>
 
-                <button
-                  onClick={handleSpeak}
-                  className={`px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all cursor-pointer shadow-xs ${
-                    isPlayingAudio
-                      ? 'bg-blue-600 text-white ring-4 ring-blue-300 scale-105'
-                      : 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 hover:bg-blue-600 hover:text-white'
-                  }`}
-                  title="Listen Pronunciation"
-                >
-                  <Volume2 className="w-4 h-4" />
-                  {isPlayingAudio && (
-                    <AudioWaveVisualizer isPlaying={true} size="xs" color="white" barsCount={5} />
-                  )}
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      playTone(580, 'sine', 0.04);
+                      triggerHaptic('medium');
+                      setShowPreviewModal(true);
+                    }}
+                    className="p-1.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 hover:bg-blue-600 hover:text-white transition-all cursor-pointer shadow-xs"
+                    title="Preview Love Examples"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    onClick={handleSpeak}
+                    className={`px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all cursor-pointer shadow-xs ${
+                      isPlayingAudio
+                        ? 'bg-blue-600 text-white ring-4 ring-blue-300 scale-105'
+                        : 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 hover:bg-blue-600 hover:text-white'
+                    }`}
+                    title="Listen Pronunciation"
+                  >
+                    <Volume2 className="w-4 h-4" />
+                    {isPlayingAudio && (
+                      <AudioWaveVisualizer isPlaying={true} size="xs" color="white" barsCount={5} />
+                    )}
+                  </button>
+                </div>
               </div>
 
               <div className="text-center space-y-2 my-auto">
@@ -264,6 +281,15 @@ export const FlashcardModal: React.FC<FlashcardModalProps> = ({ unit, onClose, o
         </div>
 
       </div>
+
+      {/* Global Word Detail Preview Modal */}
+      {showPreviewModal && word && (
+        <WordDetailPreviewModal
+          word={word}
+          chapterTitle={unit.title}
+          onClose={() => setShowPreviewModal(false)}
+        />
+      )}
 
       <style>{`
         .transform-style-3d { transform-style: preserve-3d; }

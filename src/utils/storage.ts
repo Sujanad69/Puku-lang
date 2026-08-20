@@ -1,5 +1,6 @@
 import { UserProgress, VocabWord } from '../types';
 import { OUTFITS_DATA } from '../data/outfitsData';
+import { getNepalDateString } from './date';
 
 const STORAGE_KEY = 'portuguese_puku_progress_v3';
 
@@ -9,7 +10,7 @@ export const INITIAL_PROGRESS: UserProgress = {
   gems: 0,
   hearts: 5,
   streak: 0,
-  lastPlayDate: new Date().toISOString().split('T')[0],
+  lastPlayDate: getNepalDateString(),
   purchasedOutfits: ['base'],
   currentOutfitId: 'base',
   weakWords: [],
@@ -23,7 +24,7 @@ export const INITIAL_PROGRESS: UserProgress = {
   completedUnits: [],
   completedLessons: {},
   quests: {},
-  dailyQuestsDate: new Date().toISOString().split('T')[0],
+  dailyQuestsDate: getNepalDateString(),
   streakFreezeCount: 0,
 };
 
@@ -49,13 +50,11 @@ export function saveUserProgress(progress: UserProgress) {
 }
 
 function checkDailyReset(progress: UserProgress): UserProgress {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getNepalDateString();
   const last = progress.lastPlayDate;
 
   if (last !== today) {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    const yesterdayStr = getNepalDateString(-1);
 
     let newStreak = progress.streak;
     if (last === yesterdayStr) {

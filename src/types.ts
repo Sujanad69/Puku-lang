@@ -99,6 +99,13 @@ export interface ChatMessage {
   timestamp: string;
 }
 
+export interface VoiceSettings {
+  voiceURI?: string;
+  preset: 'joana' | 'cristiano' | 'lisbon_natural' | 'porto_express' | 'custom';
+  rate: number;
+  pitch: number;
+}
+
 export type ActiveModal = 
   | 'none'
   | 'auth'
@@ -117,4 +124,5 @@ export type ActiveModal =
   | 'nepaliBridge'
   | 'map'
   | 'cashier'
-  | 'quests';
+  | 'quests'
+  | 'voiceSettings';

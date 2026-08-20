@@ -1,24 +1,43 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { subscribeAudioState } from '../utils/audio';
 
 interface AudioWaveVisualizerProps {
-  isPlaying: boolean;
-  color?: 'blue' | 'rose' | 'green' | 'amber' | 'white';
+  isPlaying?: boolean;
+  color?: 'blue' | 'rose' | 'green' | 'amber' | 'white' | 'purple' | 'cyan';
   size?: 'xs' | 'sm' | 'md' | 'lg';
   className?: string;
-  barsCount?: 3 | 5 | 7;
+  barsCount?: number;
+  syncWithGlobalAudio?: boolean;
 }
 
 export const AudioWaveVisualizer: React.FC<AudioWaveVisualizerProps> = ({
-  isPlaying,
+  isPlaying: manualIsPlaying,
   color = 'blue',
   size = 'md',
   className = '',
   barsCount = 5,
+  syncWithGlobalAudio = false,
 }) => {
+  const [globalIsPlaying, setGlobalIsPlaying] = useState(false);
+
+  useEffect(() => {
+    if (!syncWithGlobalAudio) return;
+    const unsub = subscribeAudioState((state) => {
+      setGlobalIsPlaying(state.isPlaying);
+    });
+    return () => unsub();
+  }, [syncWithGlobalAudio]);
+
+  const active = syncWithGlobalAudio ? globalIsPlaying : !!manualIsPlaying;
+
   const getColorClass = () => {
     switch (color) {
       case 'rose':
         return 'bg-gradient-to-t from-rose-500 to-pink-400 shadow-rose-500/50';
+      case 'purple':
+        return 'bg-gradient-to-t from-purple-600 to-fuchsia-400 shadow-purple-500/50';
+      case 'cyan':
+        return 'bg-gradient-to-t from-cyan-500 to-teal-300 shadow-cyan-500/50';
       case 'green':
         return 'bg-gradient-to-t from-emerald-500 to-green-400 shadow-emerald-500/50';
       case 'amber':
@@ -48,14 +67,14 @@ export const AudioWaveVisualizer: React.FC<AudioWaveVisualizerProps> = ({
   const getBarWidth = () => {
     switch (size) {
       case 'xs':
-        return 'w-[2px] rounded-full';
-      case 'sm':
         return 'w-[2.5px] rounded-full';
+      case 'sm':
+        return 'w-[3px] rounded-full';
       case 'lg':
-        return 'w-[4px] rounded-full';
+        return 'w-[4.5px] rounded-full';
       case 'md':
       default:
-        return 'w-[3px] rounded-full';
+        return 'w-[3.5px] rounded-full';
     }
   };
 
@@ -67,19 +86,19 @@ export const AudioWaveVisualizer: React.FC<AudioWaveVisualizerProps> = ({
   return (
     <div className={`inline-flex items-center justify-center ${getContainerDimensions()} ${className} select-none pointer-events-none`}>
       {bars.map((_, index) => {
-        const animClass = isPlaying ? barClasses[index % barClasses.length] : '';
+        const animClass = active ? barClasses[index % barClasses.length] : '';
         const idleHeight = idleHeights[index % idleHeights.length];
 
         return (
           <div
             key={index}
             style={{
-              height: isPlaying ? undefined : idleHeight,
+              height: active ? undefined : idleHeight,
               transformOrigin: 'bottom center',
-              transition: isPlaying ? 'none' : 'height 0.3s ease-out, transform 0.3s ease-out',
+              transition: active ? 'none' : 'height 0.3s ease-out, transform 0.3s ease-out',
             }}
             className={`${getBarWidth()} ${getColorClass()} ${animClass} shrink-0 transition-opacity duration-300 ${
-              isPlaying ? 'opacity-100 shadow-xs scale-100' : 'opacity-40 scale-95'
+              active ? 'opacity-100 shadow-xs scale-100' : 'opacity-40 scale-95'
             }`}
           />
         );

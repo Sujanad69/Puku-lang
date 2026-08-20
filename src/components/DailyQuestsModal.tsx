@@ -409,30 +409,30 @@ export const DailyQuestsModal: React.FC<DailyQuestsModalProps> = ({
                       <Gem className="w-6 h-6" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-black text-slate-900 dark:text-white">Convert Coins to Gem</h4>
+                      <h4 className="text-sm font-black text-slate-900 dark:text-white">Forge Rare Gem</h4>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        Exchange your hard-earned 150 coins for 1 rare Gem for custom 3D outfits.
+                        Exchange 300 hard-earned coins to forge 1 prestigious Gem for exclusive 3D outfits.
                       </p>
                       <p className="text-[11px] font-semibold text-purple-600 dark:text-purple-400 mt-1 flex items-center gap-1">
-                        <FlagNepal size={10} /> १५० सिक्का साटेर १ रत्न बनाउनुहोस्
+                        <FlagNepal size={10} /> ३०० सिक्का साटेर १ दुर्लभ रत्न बनाउनुहोस्
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
                     <span className="text-xs font-bold text-amber-500 flex items-center gap-1">
-                      <GoldCoin size={14} /> 150 Coins ➔ 1 Gem
+                      <GoldCoin size={14} /> 300 Coins ➔ 1 Gem
                     </span>
                     <button
                       onClick={() => {
-                        if (progress.coins < 150) {
-                          showNotice(lang === 'pt' ? 'Moedas insuficientes (precisa de 150)!' : 'Need 150 coins to forge a Gem!');
+                        if (progress.coins < 300) {
+                          showNotice(lang === 'pt' ? 'Moedas insuficientes (precisa de 300)!' : 'Need 300 coins to forge a rare Gem!');
                           return;
                         }
                         playSuccessSound();
                         triggerHaptic('success');
                         onConvertCoinsToGem();
-                        showNotice('Successfully forged 1 Gem!');
+                        showNotice('Successfully forged 1 rare Gem 💎!');
                       }}
                       className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs active:scale-95 transition-all cursor-pointer"
                     >

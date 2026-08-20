@@ -13,9 +13,11 @@ import {
   BookOpen, 
   Send,
   Flame,
-  MessageCircleHeart
+  MessageCircleHeart,
+  Eye
 } from 'lucide-react';
 import { FlagNepal } from './icons/PremiumIcons';
+import { WordDetailPreviewModal } from './WordDetailPreviewModal';
 
 interface LovePhrasesModalProps {
   unit: Unit;
@@ -43,6 +45,7 @@ export const LovePhrasesModal: React.FC<LovePhrasesModalProps> = ({
   const [activeTab, setActiveTab] = useState<'phrases' | 'letter' | 'practice'>('phrases');
   const [playingWord, setPlayingWord] = useState<string | null>(null);
   const [copiedWord, setCopiedWord] = useState<string | null>(null);
+  const [previewWord, setPreviewWord] = useState<VocabWord | null>(null);
   const [isPlayingLetter, setIsPlayingLetter] = useState(false);
 
   const handleSpeakWord = (word: VocabWord) => {
@@ -252,6 +255,20 @@ export const LovePhrasesModal: React.FC<LovePhrasesModalProps> = ({
                     {/* Right Action Icons */}
                     <div className="flex items-center gap-1.5 shrink-0 pt-0.5">
                       
+                      {/* Preview Eye Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          playTone(580, 'sine', 0.04);
+                          triggerHaptic('medium');
+                          setPreviewWord(word);
+                        }}
+                        className="h-8 w-8 rounded-full bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/50 flex items-center justify-center text-rose-600 dark:text-rose-400 hover:bg-rose-500 hover:text-white transition-colors cursor-pointer"
+                        title="Preview Love Examples"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                      </button>
+
                       {/* Copy Button */}
                       <button
                         onClick={(e) => {
@@ -426,6 +443,14 @@ export const LovePhrasesModal: React.FC<LovePhrasesModalProps> = ({
 
       </div>
 
+      {/* Global Word Detail Preview Modal */}
+      {previewWord && (
+        <WordDetailPreviewModal
+          word={previewWord}
+          chapterTitle={unit.title}
+          onClose={() => setPreviewWord(null)}
+        />
+      )}
     </div>
   );
 };
